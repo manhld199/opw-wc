@@ -16,11 +16,14 @@ function handleCredentialResponse(response) {
 async function apiCall(action, params = {}) {
   const response = await fetch(GAS_URL, {
     method: "POST",
+    mode: "cors", // BẮT BUỘC THÊM DÒNG NÀY
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ action: action, email: currentUserEmail, ...params }),
   });
   return await response.json();
 }
-
 function loadData() {
   // Lấy User Info
   apiCall("getUserInfo").then((user) => {
