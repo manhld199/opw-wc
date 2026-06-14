@@ -1,10 +1,31 @@
 <!doctype html>
 <html>
   <head>
-    <meta
-      http-equiv="refresh"
-      content="0;url=https://script.google.com/macros/s/AKfycbzkRTXvqViEmnJH92iSzRCI1cu1QfjKaKXj8NJsmUopiwN2ufu7wvB0FI5SdNVzYfeP/exec"
-    />
+    <meta charset="UTF-8" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
-  <body></body>
+  <body>
+    <h2>WC OPW HCM</h2>
+
+    <div
+      id="g_id_onload"
+      data-client_id="897420109757-78vojcfni05vvo7e8ct38d8l625r3je0.apps.googleusercontent.com"
+      data-callback="handleCredentialResponse"
+    ></div>
+
+    <div class="g_id_signin"></div>
+
+    <div id="result"></div>
+
+    <script>
+      function handleCredentialResponse(response) {
+        const payload = JSON.parse(atob(response.credential.split(".")[1]));
+
+        document.getElementById("result").innerHTML = `
+      <h3>${payload.name}</h3>
+      <p>${payload.email}</p>
+      `;
+      }
+    </script>
+  </body>
 </html>
