@@ -1,0 +1,82 @@
+body {
+  font-family: "Segoe UI", sans-serif;
+  padding: 20px;
+  background: #f0f2f5;
+}
+.container {
+  max-width: 1200px;
+  margin: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+th,
+td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+  font-size: 14px;
+}
+th {
+  background: #2e7d32;
+  color: white;
+}
+
+/* Style nút mặc định - Màu trắng/xám nhẹ */
+.btn {
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 2px solid #ddd; /* Viền xám nhạt */
+  width: 100%;
+  font-weight: bold;
+  background-color: #ffffff;
+  color: #333;
+  transition: all 0.2s;
+}
+
+/* Khi hover vào */
+.btn:hover:not(:disabled) {
+  border-color: #2e7d32;
+  background-color: #f9f9f9;
+}
+
+/* Style nút khi đã chọn */
+.btn.selected {
+  border-color: #2e7d32 !important; /* Viền xanh */
+  background-color: #e8f5e9 !important; /* Nền xanh rất nhạt */
+  color: #2e7d32 !important;
+}
+
+/* Thêm dấu tick vào nút đã chọn */
+.btn.selected::after {
+  content: " ✔️";
+}
+
+/* Style nút khi bị khóa (sau khi đã cược) */
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+#toast {
+  visibility: hidden;
+  min-width: 250px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1000;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#toast.show {
+  visibility: visible;
+}

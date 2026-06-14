@@ -2,30 +2,39 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <title>WC OPW HCM</title>
+    <link rel="stylesheet" href="style.css" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
-    <h2>WC OPW HCM</h2>
+    <div class="container">
+      <div
+        id="g_id_onload"
+        data-client_id="897420109757-78vojcfni05vvo7e8ct38d8l625r3je0.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+      ></div>
+      <div id="loginSection" class="g_id_signin"></div>
 
-    <div
-      id="g_id_onload"
-      data-client_id="897420109757-78vojcfni05vvo7e8ct38d8l625r3je0.apps.googleusercontent.com"
-      data-callback="handleCredentialResponse"
-    ></div>
+      <div id="userInfo" style="display: none"></div>
+      <table id="mainTable" style="display: none">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Thời gian</th>
+            <th>Trận đấu</th>
+            <th>Cửa trên</th>
+            <th>Chấp</th>
+            <th>Tỷ lệ Trên</th>
+            <th>Tỷ lệ Dưới</th>
+            <th>Cửa trên</th>
+            <th>Cửa dưới</th>
+          </tr>
+        </thead>
+        <tbody id="matchBody"></tbody>
+      </table>
+    </div>
+    <div id="toast"></div>
 
-    <div class="g_id_signin"></div>
-
-    <div id="result"></div>
-
-    <script>
-      function handleCredentialResponse(response) {
-        const payload = JSON.parse(atob(response.credential.split(".")[1]));
-
-        document.getElementById("result").innerHTML = `
-      <h3>${payload.name}</h3>
-      <p>${payload.email}</p>
-      `;
-      }
-    </script>
+    <script src="script.js"></script>
   </body>
 </html>
