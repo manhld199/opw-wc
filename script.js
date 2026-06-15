@@ -35,8 +35,11 @@ async function apiCall(action, params = {}) {
 function loadData() {
   apiCall("getUserInfo")
     .then((user) => {
-      document.getElementById("userInfo").innerHTML =
-        `<b>Người chơi:</b> ${user.name} | <b>Email:</b> ${user.email}`;
+      document.getElementById("userInfo").innerHTML = `
+        <span>⚽ <b>Người chơi:</b> ${user.name}</span> 
+        <span style="color: #a0aec0">|</span> 
+        <span>📧 <b>Email:</b> ${user.email}</span>
+      `;
     })
     .catch(console.error);
 
@@ -48,17 +51,17 @@ function loadData() {
       data.forEach((row) => {
         var betValue = String(row[16] || "").trim();
 
+        // <td>${row[14]}</td>
+        // <td>${row[15]}</td>
         tbody.innerHTML += `
           <tr>
-            <td>${row[0]}</td>
-            <td>${row[3]}</td>
-            <td>${row[4]} vs ${row[5]}</td>
-            <td>${row[12]}</td>
-            <td>${row[13]}</td>
-            <td>${row[14]}</td>
-            <td>${row[15]}</td>
+            <td data-label="STT">${row[0]}</td>
+            <td data-label="Thời gian">${row[3]}</td>
+            <td data-label="Trận đấu">${row[4]} vs ${row[5]}</td>
+            <td data-label="Cửa trên">${row[12]}</td>
+            <td data-label="Chấp">${row[13]}</td>
 
-            <td>
+            <td data-label="Chọn Cửa trên">
               <button
                 class="btn ${betValue === "Cửa trên" ? "selected" : ""}"
                 onclick="bet(this, ${row[0]}, 'Cửa trên')">
@@ -66,7 +69,7 @@ function loadData() {
               </button>
             </td>
 
-            <td>
+            <td data-label="Chọn Cửa dưới">
               <button
                 class="btn ${betValue === "Cửa dưới" ? "selected" : ""}"
                 onclick="bet(this, ${row[0]}, 'Cửa dưới')">
