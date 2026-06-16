@@ -387,3 +387,120 @@ td:nth-child(5) {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
+/* Slogan Sidebars (Anti-gambling & Fun banners) */
+.slogan-sidebar {
+  max-width: 1100px;
+  margin: 16px auto;
+  padding: 0 10px;
+}
+
+.slogan-card-side {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border-top: 4px solid #ea580c; /* Warning Orange */
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slogan-card-side.info {
+  border-top-color: #059669; /* Safe Green */
+}
+
+.slogan-header {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.slogan-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slogan-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #475569;
+  font-style: italic;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #f1f5f9;
+}
+
+.slogan-text:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Hover effects */
+.slogan-card-side:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Animations for desktop */
+@keyframes floatLeft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes floatRight {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* Large Screens layout: Floating Sidebars */
+@media (min-width: 1440px) {
+  .slogan-sidebar {
+    position: fixed;
+    top: 150px;
+    width: 150px;
+    margin: 0;
+    padding: 0;
+    z-index: 10;
+  }
+  
+  .left-sidebar {
+    left: calc(50% - 550px - 170px);
+    animation: floatLeft 6s ease-in-out infinite;
+  }
+  
+  .right-sidebar {
+    right: calc(50% - 550px - 170px);
+    animation: floatRight 7s ease-in-out infinite;
+  }
+  
+  .slogan-card-side {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-top: none;
+    border-left: 4px solid #ea580c;
+    padding: 16px 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  }
+  
+  .slogan-card-side.info {
+    border-left-color: #059669;
+    border-top-color: transparent;
+  }
+  
+  .slogan-header {
+    font-size: 13px;
+  }
+  
+  .slogan-text {
+    font-size: 12px;
+  }
+}
+
