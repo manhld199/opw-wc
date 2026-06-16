@@ -19,41 +19,23 @@ function handleCredentialResponse(response) {
   loadData();
 }
 
-function apiCall(action, params = {}) {
-  return new Promise((resolve, reject) => {
-    const formData = new URLSearchParams();
+// GIỮ NGUYÊN HÀM APICALL GỐC DÙNG FORMDATA CỦA BẠN
+async function apiCall(action, params = {}) {
+  const formData = new URLSearchParams();
 
-    formData.append("action", action);
-    formData.append("email", currentUserEmail);
+  formData.append("action", action);
+  formData.append("email", currentUserEmail);
 
-    Object.keys(params).forEach((key) => {
-      formData.append(key, params[key]);
-    });
-
-    // Dùng XMLHttpRequest thay cho fetch để bypass các extension
-    // can thiệp vào window.fetch gây lỗi CORS (như Shopee Price Calculator).
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", GAS_URL, true);
-    
-    xhr.onload = function () {
-      if (xhr.status >= 200 && xhr.status < 400) {
-        try {
-          const res = JSON.parse(xhr.responseText);
-          resolve(res);
-        } catch (e) {
-          reject(new Error("Lỗi parse JSON: " + e.message));
-        }
-      } else {
-        reject(new Error("Lỗi kết nối: " + xhr.status));
-      }
-    };
-    
-    xhr.onerror = function () {
-      reject(new Error("Lỗi mạng (Network Error) - Vui lòng kiểm tra kết nối hoặc extension."));
-    };
-
-    xhr.send(formData);
+  Object.keys(params).forEach((key) => {
+    formData.append(key, params[key]);
   });
+
+  const response = await fetch(GAS_URL, {
+    method: "POST",
+    body: formData,
+  });
+
+  return await response.json();
 }
 
 // HÀM SWITCH TAB CẬP NHẬT 3 NÚT ĐIỀU HƯỚNG
