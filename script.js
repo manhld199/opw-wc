@@ -18,6 +18,7 @@ function handleCredentialResponse(response) {
   document.getElementById("leaderboardTable").style.display = "none";
 
   loadData();
+  showWarningModal();
 }
 
 // GIỮ NGUYÊN HÀM APICALL GỐC DÙNG FORMDATA CỦA BẠN
@@ -267,4 +268,24 @@ function showToast(msg) {
   setTimeout(() => {
     x.className = x.className.replace("show", "");
   }, 3000);
+}
+
+function showWarningModal() {
+  const modal = document.getElementById("warningModal");
+  if (modal) {
+    modal.style.display = "flex";
+    // Force reflow to allow transition to trigger
+    modal.offsetHeight;
+    modal.classList.add("show");
+  }
+}
+
+function closeWarningModal() {
+  const modal = document.getElementById("warningModal");
+  if (modal) {
+    modal.classList.remove("show");
+    setTimeout(() => {
+      modal.style.display = "none";
+    }, 300); // Wait for transition fade out (300ms)
+  }
 }
