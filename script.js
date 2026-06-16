@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedName = localStorage.getItem("currentUserName");
   if (savedEmail) {
     currentUserEmail = savedEmail;
-    
+
     // Display stored info immediately to prevent flashing blank UI
     document.getElementById("userInfo").innerHTML = `
       <span>⚽ <b>Người chơi:</b> ${savedName || 'Đang tải...'}</span> 
@@ -18,15 +18,15 @@ document.addEventListener("DOMContentLoaded", () => {
       <span>📧 <b>Email:</b> ${savedEmail}</span>
       <button class="logout-btn" onclick="logout()">Đăng xuất</button>
     `;
-    
+
     document.getElementById("loginSectionWrapper").style.display = "none";
     document.getElementById("userInfo").style.display = "flex";
     document.getElementById("tabContainer").style.display = "flex";
-    
+
     // Mặc định ban đầu hiển thị bảng trận đấu
     document.getElementById("mainTable").style.display = "table";
     document.getElementById("leaderboardTable").style.display = "none";
-    
+
     loadData();
   }
 });
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function handleCredentialResponse(response) {
   const payload = JSON.parse(atob(response.credential.split(".")[1]));
   currentUserEmail = payload.email;
-  
+
   // Save login session
   localStorage.setItem("currentUserEmail", payload.email);
   localStorage.setItem("currentUserName", payload.name || "");
@@ -145,11 +145,11 @@ function loadData() {
         // Quy đổi tên đội thắng thành Cửa trên / Cửa dưới
         var actualWinningChoice = "";
         if (winningTeam) {
-            if (winningTeam === upperTeam) {
-                actualWinningChoice = "Cửa trên";
-            } else {
-                actualWinningChoice = "Cửa dưới";
-            }
+          if (winningTeam === upperTeam) {
+            actualWinningChoice = "Cửa trên";
+          } else {
+            actualWinningChoice = "Cửa dưới";
+          }
         }
 
         // Nếu ở tab quá khứ, thêm thuộc tính disabled để khóa không cho click sửa đổi
@@ -159,17 +159,17 @@ function loadData() {
         if (currentTab === "past") {
           var badgeClass = "status-wait";
           var badgeText = "⏳ Chờ KQ";
-          
+
           if (actualWinningChoice) {
             if (betValue === "") {
-               badgeClass = "status-lose";
-               badgeText = "❌ Không chọn";
+              badgeClass = "status-lose";
+              badgeText = "❌ Không chọn";
             } else if (actualWinningChoice === betValue) {
-               badgeClass = "status-win";
-               badgeText = "✅ Thắng";
+              badgeClass = "status-win";
+              badgeText = "✅ Thắng";
             } else {
-               badgeClass = "status-lose";
-               badgeText = "❌ Thua";
+              badgeClass = "status-lose";
+              badgeText = "❌ Thua";
             }
           }
           resultHtml = `<td data-label="Kết quả"><span class="status-badge ${badgeClass}">${badgeText}</span></td>`;
