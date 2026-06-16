@@ -19,7 +19,13 @@
         data-client_id="897420109757-78vojcfni05vvo7e8ct38d8l625r3je0.apps.googleusercontent.com"
         data-callback="handleCredentialResponse"
       ></div>
-      <div id="loginSection" class="g_id_signin"></div>
+      <div id="loginSectionWrapper" class="login-wrapper">
+        <div class="login-card">
+          <h1>🏆 Dự Đoán World Cup</h1>
+          <p>Đăng nhập bằng tài khoản Google để tham gia bình chọn</p>
+          <div id="loginSection" class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left" data-width="280"></div>
+        </div>
+      </div>
 
       <div id="userInfo" style="display: none"></div>
 
@@ -43,8 +49,9 @@
             <th>Trận đấu</th>
             <th>Cửa trên</th>
             <th>Chấp</th>
-            <th>Cửa trên</th>
-            <th>Cửa dưới</th>
+            <th id="thChoice1">Cửa trên</th>
+            <th id="thChoice2">Cửa dưới</th>
+            <th id="thResult" style="display: none">Kết quả</th>
           </tr>
         </thead>
         <tbody id="matchBody"></tbody>
@@ -66,6 +73,11 @@
     </div>
     <div id="toast"></div>
 
-    <script src="script.js"></script>
+    <div id="fullScreenLoader" class="loader-overlay" style="display: none">
+      <div class="spinner"></div>
+      <p>Đang tải dữ liệu...</p>
+    </div>
+
+    <script src="script.js?v=3"></script>
   </body>
 </html>

@@ -4,11 +4,12 @@ const GAS_URL =
 let currentUserEmail = "";
 let currentTab = "active"; // Các trạng thái: "active", "past", hoặc "leaderboard"
 
+
 function handleCredentialResponse(response) {
   const payload = JSON.parse(atob(response.credential.split(".")[1]));
   currentUserEmail = payload.email;
 
-  document.getElementById("loginSection").style.display = "none";
+  document.getElementById("loginSectionWrapper").style.display = "none";
   document.getElementById("userInfo").style.display = "flex";
   document.getElementById("tabContainer").style.display = "flex";
 
@@ -80,15 +81,45 @@ function loadData() {
       var tbody = document.getElementById("matchBody");
       tbody.innerHTML = "";
 
+      // Quản lý hiển thị cột Kết quả trên thead
+      if (currentTab === "past") {
+        document.getElementById("thResult").style.display = "table-cell";
+      } else {
+        document.getElementById("thResult").style.display = "none";
+      }
+
       if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 30px; color: #718096;">Không có trận đấu nào trong danh mục này.</td></tr>`;
+        let colspan = currentTab === "past" ? "8" : "7";
+        tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; padding: 30px; color: #718096;">Không có trận đấu nào trong danh mục này.</td></tr>`;
         return;
       }
 
       data.forEach((row) => {
         var betValue = String(row[16] || "").trim();
+        var winningChoice = String(row[10] || "").trim(); // Cột K - Đội thắng kèo
+
         // Nếu ở tab quá khứ, thêm thuộc tính disabled để khóa không cho click sửa đổi
         var isDisabled = currentTab === "past" ? "disabled" : "";
+
+        var resultHtml = "";
+        if (currentTab === "past") {
+          var badgeClass = "status-wait";
+          var badgeText = "⏳ Chờ KQ";
+          
+          if (winningChoice) {
+            if (betValue === "") {
+               badgeClass = "status-lose";
+               badgeText = "❌ Không chọn";
+            } else if (winningChoice === betValue) {
+               badgeClass = "status-win";
+               badgeText = "✅ Thắng";
+            } else {
+               badgeClass = "status-lose";
+               badgeText = "❌ Thua";
+            }
+          }
+          resultHtml = `<td data-label="Kết quả"><span class="status-badge ${badgeClass}">${badgeText}</span></td>`;
+        }
 
         tbody.innerHTML += `
           <tr>
@@ -115,6 +146,7 @@ function loadData() {
                 Cửa dưới
               </button>
             </td>
+            ${resultHtml}
           </tr>
         `;
       });
@@ -168,21 +200,32 @@ function loadLeaderboardData() {
     });
 }
 
+function showLoader() {
+  document.getElementById("fullScreenLoader").style.display = "flex";
+}
+
+function hideLoader() {
+  document.getElementById("fullScreenLoader").style.display = "none";
+}
+
 function bet(btn, stt, choice) {
   // Chặn trường hợp kích hoạt cược nhầm khi không ở tab active
   if (currentTab === "past" || currentTab === "leaderboard") return;
 
   btn.innerText = "⏳...";
+  showLoader();
 
   apiCall("submitBet", {
     stt: stt,
     choice: choice,
   })
     .then((res) => {
+      hideLoader();
       showToast(typeof res === "string" ? res : JSON.stringify(res));
       loadData();
     })
     .catch((err) => {
+      hideLoader();
       console.error(err);
       showToast("Có lỗi xảy ra");
     });
