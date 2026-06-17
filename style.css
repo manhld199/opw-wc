@@ -1114,3 +1114,82 @@ td:nth-child(5) {
     max-height: 90vh;
   }
 }
+
+/* --- HỆ THỐNG DANH HIỆU (BADGES) --- */
+.badges-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.player-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.player-badge.badge-tien-tri { background: #fff7ed; color: #c2410c; border-color: #ffedd5; }
+.player-badge.badge-pele { background: #f8fafc; color: #334155; border-color: #e2e8f0; }
+.player-badge.badge-tu-thien { background: #fef2f2; color: #b91c1c; border-color: #fee2e2; }
+.player-badge.badge-tam-linh { background: #fdf4ff; color: #a21caf; border-color: #fae8ff; }
+.player-badge.badge-nguoc-dong { background: #eff6ff; color: #1d4ed8; border-color: #dbeafe; }
+
+/* --- HIỆU ỨNG MƯA BUỒN --- */
+.rain-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.raindrop {
+  position: absolute;
+  width: 2px;
+  height: 25px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(148, 163, 184, 0.8));
+  animation: fall linear infinite;
+  opacity: 0.6;
+}
+
+@keyframes fall {
+  0% { transform: translateY(-30px); }
+  100% { transform: translateY(100vh); }
+}
+
+/* Modal grayscale state cho trận thua */
+.modal-overlay.is-lose .detail-modal-card {
+  filter: grayscale(80%) sepia(10%);
+  background-color: #f1f5f9;
+}
+
+/* --- SOUND TOGGLE --- */
+.sound-toggle-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.sound-toggle-btn:hover {
+  background: #e2e8f0;
+}
+

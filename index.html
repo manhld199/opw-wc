@@ -11,6 +11,7 @@
     />
     <link rel="stylesheet" href="style.css" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -149,10 +150,14 @@
 
     <!-- Match Detail Modal (Feature 8) -->
     <div id="matchDetailModal" class="modal-overlay">
+      <div id="rainContainer" class="rain-overlay" style="display: none;"></div>
       <div class="modal-card detail-modal-card">
         <div class="detail-header">
           <h3 id="detailMatchTitle" class="detail-title">Chi tiết trận đấu</h3>
-          <button class="detail-close-btn" onclick="closeMatchDetail()">&#x2715;</button>
+          <div style="display: flex; gap: 8px;">
+            <button id="soundToggle" class="sound-toggle-btn" style="display: none;" onclick="toggleMemeSound()">🔊 Phát âm thanh</button>
+            <button class="detail-close-btn" onclick="closeMatchDetail()">&#x2715;</button>
+          </div>
         </div>
         <div id="detailMatchInfo" class="detail-match-info"></div>
         <div class="detail-section-title">📋 Bình chọn của mọi người</div>

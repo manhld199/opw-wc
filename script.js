@@ -11,6 +11,8 @@ let currentMatchesData = [];
 var countdownIntervals = {};
 // Feature 8: Match data cache for detail modal (stt -> rowArray)
 var matchDataCache = {};
+// Cache for leaderboard badges
+var leaderboardCache = [];
 
 // Auto login check on page load
 document.addEventListener("DOMContentLoaded", () => {
@@ -259,44 +261,50 @@ function renderMatches() {
       resultHtml = `<td data-label="Kết quả"><span class="status-badge ${badgeClass}">${badgeText}</span></td>`;
     }
 
+    // Định dạng thời gian
+    var matchTimeObj = new Date(row[3]);
+    var timeStr = isNaN(matchTimeObj.getTime())
+      ? row[3]
+      : matchTimeObj.toLocaleTimeString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }) +
+        " - " +
+        matchTimeObj.toLocaleDateString("vi-VN", {
+          day: "2-digit",
+          month: "2-digit",
+        });
+
     // Feature 1: Countdown td (chỉ active tab)
     var countdownHtml = currentTab === "active"
       ? `<td class="countdown-cell" data-label="Còn lại" id="cd-${row[0]}">⏱...</td>`
       : "";
 
-    // Feature 4: Highlight trận chưa chọn (chỉ active tab, bỏ trống betValue)
-    var unbetClass = (currentTab === "active" && betValue === "") ? "row-unbet" : "";
-    var unbetIcon  = (currentTab === "active" && betValue === "")
-      ? ` <span class="unbet-icon" title="Bạn chưa chọn kèo!">&#x26A0;&#xFE0F;</span>`
-      : "";
+    // Feature 8: Lưu data vào cache bằng STT để dùng cho modal
+    matchDataCache[row[0]] = row;
 
-    // Feature 8: Clickable row cho past tab + cache data
-    var trAttrs;
-    if (currentTab === "past") {
-      matchDataCache[row[0]] = row;
-      trAttrs = `class="clickable-row" onclick="openMatchDetail(${row[0]})"`;
-    } else {
-      trAttrs = unbetClass ? `class="${unbetClass}"` : "";
-    }
+    var isUnbet = betValue === "" && currentTab === "active" ? "row-unbet" : "";
+    var warnIcon = isUnbet ? '<span class="unbet-icon" title="Bạn chưa chọn trận này!">⚠️</span>' : '';
 
     tbody.innerHTML += `
-      <tr ${trAttrs}>
-        <td data-label="STT">${row[0]}</td>
-        <td data-label="Thời gian">${row[3]}</td>
-        <td data-label="Trận đấu">${matchTitle}${unbetIcon}</td>
-        <td data-label="Cửa trên">${upperTeam}</td>
-        <td data-label="Chấp">${row[13]}</td>
-        ${countdownHtml}
-        <td data-label="Chọn Cửa trên">
-          <button
-            class="btn ${betValue === "Cửa trên" ? "selected" : ""}"
-            ${isDisabled}
-            id="btn-u-${row[0]}"
-            onclick="bet(this, ${row[0]}, 'Cửa trên')">
-            &#x25B2; ${upperTeam}
-          </button>
+      <tr class="${isUnbet}" ${currentTab === "past" ? `onclick="openMatchDetail(${row[0]})" class="clickable-row"` : ''}>
+        <td data-label="STT"><b>${row[0]}</b>${warnIcon}</td>
+        <td data-label="Thời gian">${timeStr}</td>
+        <td data-label="Trận" class="match-col">
+          <div style="font-weight:700; color:#1e293b;">${homeTeam}</div>
+          <div style="font-size:11px; color:#94a3b8; margin:2px 0;">vs</div>
+          <div style="font-weight:700; color:#1e293b;">${awayTeam}</div>
         </td>
-        <td data-label="Chọn Cửa dưới">
+        <td data-label="Cửa trên / Cửa dưới">
+          <div style="margin-bottom: 5px;">
+            <button
+              class="btn ${betValue === "Cửa trên" ? "selected" : ""}"
+              ${isDisabled}
+              id="btn-u-${row[0]}"
+              onclick="bet(this, ${row[0]}, 'Cửa trên')">
+              &#x25B2; ${upperTeam}
+            </button>
+          </div>
           <button
             class="btn ${betValue === "Cửa dưới" ? "selected" : ""}"
             ${isDisabled}
@@ -305,7 +313,9 @@ function renderMatches() {
             &#x25BC; ${lowerTeam}
           </button>
         </td>
+        <td data-label="Tỷ lệ">${row[13]}</td>
         ${resultHtml}
+        ${countdownHtml}
       </tr>
     `;
   });
@@ -338,6 +348,8 @@ function loadLeaderboardData() {
         return;
       }
 
+      leaderboardCache = data; // Lưu cache để dùng cho chi tiết trận đấu
+
       // Tự động sort theo hạng tăng dần
       data.sort((a, b) => Number(a.rank) - Number(b.rank));
 
@@ -354,10 +366,25 @@ function loadLeaderboardData() {
         else if (player.rank == 2) highlightClass = "top-2";
         else if (Number(player.totalScore) < 0) highlightClass = "negative-score";
 
+        let badgesHtml = "";
+        if (player.badges && player.badges.length > 0) {
+          badgesHtml = '<div class="badges-container">';
+          player.badges.forEach(b => {
+            let bClass = "";
+            if (b.includes("Tiên Tri")) bClass = "badge-tien-tri";
+            else if (b.includes("Pele")) bClass = "badge-pele";
+            else if (b.includes("Từ Thiện")) bClass = "badge-tu-thien";
+            else if (b.includes("Tâm Linh")) bClass = "badge-tam-linh";
+            else if (b.includes("Ngược Dòng")) bClass = "badge-nguoc-dong";
+            badgesHtml += `<span class="player-badge ${bClass}">${b}</span>`;
+          });
+          badgesHtml += '</div>';
+        }
+
         tbody.innerHTML += `
           <tr class="${highlightClass}">
             <td data-label="Hạng" class="rank-col"><b>${player.rank}</b></td>
-            <td data-label="Thành viên"><b>${player.name}</b></td>
+            <td data-label="Thành viên"><b>${player.name}</b>${badgesHtml}</td>
             <td data-label="Tổng điểm" class="score-col">${player.totalScore}</td>
             <td data-label="Trận đúng" style="color: #2e7d32; font-weight:600;">${player.winMatches}</td>
             <td data-label="Trận sai" style="color: #e53e3e; font-weight:600;">${player.loseMatches}</td>
@@ -662,6 +689,7 @@ function openMatchDetail(stt) {
   `;
 
   // Reset và hiển thị modal
+  resetMemeEffects(); // Reset trước khi show dữ liệu mới
   document.getElementById("detailVotesList").innerHTML =
     '<div style="text-align:center; padding: 20px; color: #718096;">⏳ Đang tải bình chọn...</div>';
 
@@ -669,6 +697,15 @@ function openMatchDetail(stt) {
   modal.style.display = "flex";
   modal.offsetHeight; // force reflow
   modal.classList.add("show");
+
+  // Kích hoạt hiệu ứng sau khi modal hiện
+  if (betValue && actualWinningChoice) {
+    if (betValue === actualWinningChoice) {
+      triggerWinEffect();
+    } else {
+      triggerLoseEffect();
+    }
+  }
 
   // Gọi API lấy bình chọn của tất cả mọi người
   apiCall("getMatchDetail", { stt: stt })
@@ -715,10 +752,29 @@ function openMatchDetail(stt) {
           : "vote-none";
         var cardClass = isCorrect ? "vote-card-correct" : isWrong ? "vote-card-wrong" : "";
 
+        // Gắn danh hiệu cho từng người chơi
+        var userBadgeHtml = "";
+        var cachedUser = leaderboardCache.find(p => p.name === v.name);
+        if (cachedUser && cachedUser.badges && cachedUser.badges.length > 0) {
+          userBadgeHtml = '<div class="badges-container" style="margin-top: 4px;">';
+          cachedUser.badges.forEach(b => {
+             let bClass = "";
+             if (b.includes("Tiên Tri")) bClass = "badge-tien-tri";
+             else if (b.includes("Pele")) bClass = "badge-pele";
+             else if (b.includes("Từ Thiện")) bClass = "badge-tu-thien";
+             else if (b.includes("Tâm Linh")) bClass = "badge-tam-linh";
+             else if (b.includes("Ngược Dòng")) bClass = "badge-nguoc-dong";
+             // Chỉ lấy icon emoji để tiết kiệm diện tích thẻ
+             userBadgeHtml += `<span class="player-badge ${bClass}" style="font-size:12px; padding: 1px 4px;" title="${b}">${b.split(' ')[0]}</span>`; 
+          });
+          userBadgeHtml += '</div>';
+        }
+
         votesHtml += `
           <div class="vote-card ${cardClass}">
-            <div class="vote-name">${v.name}</div>
-            <div class="vote-choice ${choiceClass}">${choiceLabel}</div>
+            <div class="vote-name" title="${v.name}">${v.name}</div>
+            ${userBadgeHtml}
+            <div class="vote-choice ${choiceClass}" style="margin-top: 4px;">${choiceLabel}</div>
           </div>
         `;
       });
@@ -737,6 +793,88 @@ function closeMatchDetail() {
   var modal = document.getElementById("matchDetailModal");
   if (modal) {
     modal.classList.remove("show");
-    setTimeout(function() { modal.style.display = "none"; }, 300);
+    setTimeout(function() { 
+      modal.style.display = "none"; 
+      resetMemeEffects(); // Reset effects when closing
+    }, 300);
   }
 }
+
+// =====================================================================
+// FEATURE 9: MEME EFFECTS
+// =====================================================================
+var currentAudio = null;
+
+function triggerWinEffect() {
+  if (typeof confetti === "function") {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#2e7d32', '#4ade80', '#fbbf24']
+    });
+  }
+  document.getElementById("soundToggle").style.display = "inline-block";
+  document.getElementById("soundToggle").dataset.type = "win";
+}
+
+function triggerLoseEffect() {
+  var modal = document.getElementById("matchDetailModal");
+  modal.classList.add("is-lose");
+  
+  var rainContainer = document.getElementById("rainContainer");
+  rainContainer.style.display = "block";
+  rainContainer.innerHTML = "";
+  
+  // Tạo 20 giọt mưa
+  for (var i = 0; i < 20; i++) {
+    var drop = document.createElement("div");
+    drop.className = "raindrop";
+    drop.style.left = Math.random() * 100 + "%";
+    drop.style.animationDuration = (Math.random() * 0.5 + 0.5) + "s";
+    drop.style.animationDelay = (Math.random() * 2) + "s";
+    rainContainer.appendChild(drop);
+  }
+  
+  document.getElementById("soundToggle").style.display = "inline-block";
+  document.getElementById("soundToggle").dataset.type = "lose";
+}
+
+function resetMemeEffects() {
+  var modal = document.getElementById("matchDetailModal");
+  modal.classList.remove("is-lose");
+  
+  var rainContainer = document.getElementById("rainContainer");
+  rainContainer.style.display = "none";
+  rainContainer.innerHTML = "";
+  
+  var soundToggle = document.getElementById("soundToggle");
+  soundToggle.style.display = "none";
+  soundToggle.innerText = "🔊 Phát âm thanh";
+  
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+}
+
+function toggleMemeSound() {
+  var soundToggle = document.getElementById("soundToggle");
+  var type = soundToggle.dataset.type;
+  
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+    soundToggle.innerText = "🔊 Phát âm thanh";
+    return;
+  }
+  
+  var src = type === "win" 
+    ? "https://www.myinstants.com/media/sounds/crowd-cheering.mp3" 
+    : "https://www.myinstants.com/media/sounds/sad-violin.mp3";
+    
+  currentAudio = new Audio(src);
+  currentAudio.play().catch(function(e) { console.log("Audio play prevented:", e); });
+  soundToggle.innerText = "🔇 Tắt âm thanh";
+}
+
