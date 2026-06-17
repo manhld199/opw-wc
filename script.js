@@ -141,6 +141,9 @@ function loadData(showLoading = true) {
         var betValue = String(row[16] || "").trim(); // Lựa chọn của user ("Cửa trên" hoặc "Cửa dưới")
         var winningTeam = String(row[10] || "").trim(); // Tên đội thắng kèo (Cột K)
         var upperTeam = String(row[12] || "").trim(); // Tên đội cửa trên (Cột M)
+        var homeTeam = String(row[4] || "").trim();
+        var awayTeam = String(row[5] || "").trim();
+        var lowerTeam = upperTeam === homeTeam ? awayTeam : homeTeam; // Đội cửa dưới
 
         // Quy đổi tên đội thắng thành Cửa trên / Cửa dưới
         var actualWinningChoice = "";
@@ -188,7 +191,7 @@ function loadData(showLoading = true) {
                 class="btn ${betValue === "Cửa trên" ? "selected" : ""}"
                 ${isDisabled}
                 onclick="bet(this, ${row[0]}, 'Cửa trên')">
-                Cửa trên
+                ▲ ${upperTeam}
               </button>
             </td>
 
@@ -197,7 +200,7 @@ function loadData(showLoading = true) {
                 class="btn ${betValue === "Cửa dưới" ? "selected" : ""}"
                 ${isDisabled}
                 onclick="bet(this, ${row[0]}, 'Cửa dưới')">
-                Cửa dưới
+                ▼ ${lowerTeam}
               </button>
             </td>
             ${resultHtml}
