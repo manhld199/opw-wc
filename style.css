@@ -166,14 +166,13 @@ td:nth-child(3) {
 }
 
 /* Cột Chấp / Tỉ lệ */
-#mainTable td:nth-child(5) {
+.handicap-badge {
   font-weight: 600;
   color: #e53e3e; /* Màu đỏ nổi bật cho tỷ lệ chấp */
   background: #fff5f5;
   border-radius: 4px;
   display: inline-block;
   padding: 4px 10px;
-  margin-top: 12px;
 }
 
 /* Style nút bấm */

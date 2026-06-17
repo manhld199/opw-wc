@@ -300,7 +300,7 @@ function renderMatches() {
         <td data-label="Thời gian">${timeStr}</td>
         <td data-label="Trận đấu" class="match-col">${matchTitle}${unbetIcon}</td>
         <td data-label="Cửa trên">${upperTeam}</td>
-        <td data-label="Chấp">${row[13]}</td>
+        <td data-label="Chấp"><span class="handicap-badge">${row[13]}</span></td>
         ${countdownHtml}
         <td data-label="Chọn Cửa trên">
           <button
