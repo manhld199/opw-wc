@@ -819,8 +819,7 @@ function triggerWinEffect() {
       colors: ['#2e7d32', '#4ade80', '#fbbf24']
     });
   }
-  document.getElementById("soundToggle").style.display = "inline-block";
-  document.getElementById("soundToggle").dataset.type = "win";
+  playMemeSound("win");
 }
 
 function triggerLoseEffect() {
@@ -841,21 +840,23 @@ function triggerLoseEffect() {
     rainContainer.appendChild(drop);
   }
   
-  document.getElementById("soundToggle").style.display = "inline-block";
-  document.getElementById("soundToggle").dataset.type = "lose";
+  playMemeSound("lose");
 }
 
 function resetMemeEffects() {
   var modal = document.getElementById("matchDetailModal");
-  modal.classList.remove("is-lose");
+  if(modal) modal.classList.remove("is-lose");
   
   var rainContainer = document.getElementById("rainContainer");
-  rainContainer.style.display = "none";
-  rainContainer.innerHTML = "";
+  if(rainContainer) {
+    rainContainer.style.display = "none";
+    rainContainer.innerHTML = "";
+  }
   
   var soundToggle = document.getElementById("soundToggle");
-  soundToggle.style.display = "none";
-  soundToggle.innerText = "🔊 Phát âm thanh";
+  if(soundToggle) {
+    soundToggle.style.display = "none";
+  }
   
   if (currentAudio) {
     currentAudio.pause();
@@ -863,15 +864,10 @@ function resetMemeEffects() {
   }
 }
 
-function toggleMemeSound() {
-  var soundToggle = document.getElementById("soundToggle");
-  var type = soundToggle.dataset.type;
-  
+function playMemeSound(type) {
   if (currentAudio) {
     currentAudio.pause();
     currentAudio = null;
-    soundToggle.innerText = "🔊 Phát âm thanh";
-    return;
   }
   
   var src = type === "win" 
@@ -880,6 +876,5 @@ function toggleMemeSound() {
     
   currentAudio = new Audio(src);
   currentAudio.play().catch(function(e) { console.log("Audio play prevented:", e); });
-  soundToggle.innerText = "🔇 Tắt âm thanh";
 }
 

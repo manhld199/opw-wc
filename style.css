@@ -166,7 +166,7 @@ td:nth-child(3) {
 }
 
 /* Cột Chấp / Tỉ lệ */
-td:nth-child(5) {
+#mainTable td:nth-child(5) {
   font-weight: 600;
   color: #e53e3e; /* Màu đỏ nổi bật cho tỷ lệ chấp */
   background: #fff5f5;
