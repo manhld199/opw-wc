@@ -211,6 +211,11 @@ function renderMatches() {
     return true;
   });
 
+  // Đảo ngược thứ tự cho tab lịch sử (trận mới nhất lên trên)
+  if (currentTab === "past") {
+    filteredData.reverse();
+  }
+
   if (filteredData.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 30px; color: #718096;">Không có trận đấu nào phù hợp với bộ lọc.</td></tr>`;
     return;
