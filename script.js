@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("leaderboardTable").style.display = "none";
 
     loadData();
+    showWarningModal();
     loadMyStats(); // load stats card
     startLiveScoreAutoRefresh();
   }
