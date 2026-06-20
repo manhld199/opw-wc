@@ -361,10 +361,10 @@ function renderMatches() {
 
           <div class="flex gap-2 w-full md:w-auto">
             <button class="flex-1 md:w-28 py-2.5 rounded-xl border border-gray-100 text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa trên" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
-              Over
+              ▲ ${upperTeam}
             </button>
             <button class="flex-1 md:w-28 py-2.5 rounded-xl border border-gray-100 text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa dưới" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
-              Under
+              ▼ ${lowerTeam}
             </button>
           </div>
         </div>
