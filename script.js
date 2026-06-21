@@ -219,7 +219,18 @@ function renderMatches() {
       var actualWinningChoice = "";
       var matchStatusFilter = String(row[8] || "").trim();
       if (winningTeam && matchStatusFilter.includes("Kết thúc")) {
-        actualWinningChoice = winningTeam === upperTeam ? "Cửa trên" : "Cửa dưới";
+        var hScoreF = parseFloat(row[6]);
+        var aScoreF = parseFloat(row[7]);
+        var hCapF = parseFloat(row[13]);
+        if (!isNaN(hScoreF) && !isNaN(aScoreF) && !isNaN(hCapF)) {
+          var diffF = upperTeam === homeTeam ? hScoreF - aScoreF : aScoreF - hScoreF;
+          if (diffF === hCapF) actualWinningChoice = "Hòa";
+          else if (diffF > hCapF) actualWinningChoice = "Cửa trên";
+          else actualWinningChoice = "Cửa dưới";
+        } else {
+          if (winningTeam === "Hòa" || winningTeam === "Hòa kèo") actualWinningChoice = "Hòa";
+          else actualWinningChoice = winningTeam === upperTeam ? "Cửa trên" : "Cửa dưới";
+        }
       }
 
       if (statusFilter === "unbet") {
@@ -234,6 +245,7 @@ function renderMatches() {
           currentTab !== "past" ||
           betValue === "" ||
           actualWinningChoice === betValue ||
+          actualWinningChoice === "Hòa" ||
           !actualWinningChoice
         )
           return false;
@@ -278,7 +290,18 @@ function renderMatches() {
 
     var actualWinningChoice = "";
     if (winningTeam && matchStatus.includes("Kết thúc")) {
-      actualWinningChoice = winningTeam === upperTeam ? "Cửa trên" : "Cửa dưới";
+      var hScoreNum = parseFloat(row[6]);
+      var aScoreNum = parseFloat(row[7]);
+      var hCapNum = parseFloat(row[13]);
+      if (!isNaN(hScoreNum) && !isNaN(aScoreNum) && !isNaN(hCapNum)) {
+        var diffNum = upperTeam === homeTeam ? hScoreNum - aScoreNum : aScoreNum - hScoreNum;
+        if (diffNum === hCapNum) actualWinningChoice = "Hòa";
+        else if (diffNum > hCapNum) actualWinningChoice = "Cửa trên";
+        else actualWinningChoice = "Cửa dưới";
+      } else {
+        if (winningTeam === "Hòa" || winningTeam === "Hòa kèo") actualWinningChoice = "Hòa";
+        else actualWinningChoice = winningTeam === upperTeam ? "Cửa trên" : "Cửa dưới";
+      }
     }
 
     var isDisabled = currentTab === "past" ? "disabled" : "";
@@ -288,7 +311,10 @@ function renderMatches() {
     var badgeClass = "status-wait";
     var badgeText = matchStatus === "Đang đá" ? "⏳ Đang đá" : "⏳ Chờ KQ";
     if (actualWinningChoice) {
-      if (betValue === "") {
+      if (actualWinningChoice === "Hòa") {
+        badgeClass = "status-draw";
+        badgeText = "➖ Hòa kèo";
+      } else if (betValue === "") {
         badgeClass = "status-lose";
         badgeText = "❌ Không chọn";
       } else if (actualWinningChoice === betValue) {
@@ -709,11 +735,21 @@ function openMatchDetail(stt) {
   var winningTeam = String(row[10] || "").trim();
 
   var matchStatusDetail = String(row[8] || "").trim();
-  var actualWinningChoice = (winningTeam && matchStatusDetail.includes("Kết thúc"))
-    ? winningTeam === upperTeam
-      ? "Cửa trên"
-      : "Cửa dưới"
-    : "";
+  var actualWinningChoice = "";
+  if (winningTeam && matchStatusDetail.includes("Kết thúc")) {
+    var hScoreNum = parseFloat(row[6]);
+    var aScoreNum = parseFloat(row[7]);
+    var hCapNum = parseFloat(row[13]);
+    if (!isNaN(hScoreNum) && !isNaN(aScoreNum) && !isNaN(hCapNum)) {
+      var diffNum = upperTeam === homeTeam ? hScoreNum - aScoreNum : aScoreNum - hScoreNum;
+      if (diffNum === hCapNum) actualWinningChoice = "Hòa";
+      else if (diffNum > hCapNum) actualWinningChoice = "Cửa trên";
+      else actualWinningChoice = "Cửa dưới";
+    } else {
+      if (winningTeam === "Hòa" || winningTeam === "Hòa kèo") actualWinningChoice = "Hòa";
+      else actualWinningChoice = winningTeam === upperTeam ? "Cửa trên" : "Cửa dưới";
+    }
+  }
 
   var scoreStr =
     homeScore !== "" && awayScore !== ""
@@ -725,6 +761,8 @@ function openMatchDetail(stt) {
   var myResultBadge;
   if (!actualWinningChoice) {
     myResultBadge = '<span class="status-badge status-wait">⏳ Chờ KQ</span>';
+  } else if (actualWinningChoice === "Hòa") {
+    myResultBadge = '<span class="status-badge status-draw">➖ Hòa kèo</span>';
   } else if (!betValue) {
     myResultBadge = '<span class="status-badge status-lose">❌ Không chọn</span>';
   } else if (betValue === actualWinningChoice) {
@@ -741,11 +779,13 @@ function openMatchDetail(stt) {
         : "Chưa chọn";
 
   var resultLabel =
-    actualWinningChoice === "Cửa trên"
-      ? "▲ " + upperTeam
-      : actualWinningChoice === "Cửa dưới"
-        ? "▼ " + lowerTeam
-        : "Chưa có";
+    actualWinningChoice === "Hòa"
+      ? "➖ Hòa kèo"
+      : actualWinningChoice === "Cửa trên"
+        ? "▲ " + upperTeam
+        : actualWinningChoice === "Cửa dưới"
+          ? "▼ " + lowerTeam
+          : "Chưa có";
 
   document.getElementById("detailMatchInfo").innerHTML = `
     <div class="grid grid-cols-2 gap-3 text-sm">
@@ -823,8 +863,9 @@ function openMatchDetail(stt) {
 
       var votesHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">';
       votes.forEach(function (v) {
-        var isCorrect = actualWinningChoice && v.choice === actualWinningChoice;
-        var isWrong = actualWinningChoice && v.choice && v.choice !== actualWinningChoice;
+        var isCorrect = actualWinningChoice && actualWinningChoice !== "Hòa" && v.choice === actualWinningChoice;
+        var isWrong = actualWinningChoice && actualWinningChoice !== "Hòa" && v.choice && v.choice !== actualWinningChoice;
+        var isDraw = actualWinningChoice === "Hòa";
         var choiceLabel =
           v.choice === "Cửa trên"
             ? "▲ " + upperTeam
@@ -841,7 +882,9 @@ function openMatchDetail(stt) {
           ? "border-green-200 bg-green-50/50" 
           : isWrong 
             ? "border-red-200 bg-red-50/50" 
-            : "border-gray-100 bg-white";
+            : isDraw
+              ? "border-yellow-200 bg-yellow-50/50"
+              : "border-gray-100 bg-white";
 
         var userBadgeHtml = "";
         var cachedUser = leaderboardCache.find((p) => p.name === v.name);
