@@ -1,0 +1,608 @@
+function doGet(e) {
+  return ContentService
+    .createTextOutput("OK")
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
+function doPost(e) {
+  try {
+    var params = e.parameter;
+
+    var action = params.action;
+    var email = params.email;
+
+    var output;
+
+    if (action === "getUserInfo") {
+      output = getUserInfo(email);
+    }
+    else if (action === "getMatches") {
+      output = getMatches(email);
+    }
+    else if (action === "getPastMatches") {
+      output = getPastMatches(email);
+    }
+    else if (action === "getLeaderboard") {
+      output = getLeaderboard();
+    }
+    else if (action === "getMatchDetail") {
+      output = getMatchDetail(params.stt);
+    }
+    else if (action === "submitBet") {
+      output = submitBet(
+        email,
+        params.stt,
+        params.choice
+      );
+    }
+    else {
+      output = {
+        error: "Invalid Action"
+      };
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify(output))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(
+        JSON.stringify({
+          error: err.toString()
+        })
+      )
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getUserInfo(email) {
+  var data = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheetByName("Data")
+    .getRange("A2:C50")
+    .getValues();
+
+  for (var i = 0; i < data.length; i++) {
+    if (data[i][0] == email) {
+      return {
+        name: data[i][1],
+        email: email
+      };
+    }
+  }
+
+  return {
+    name: "Khách",
+    email: email
+  };
+}
+
+function getMatches(email) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var sheetInfo = ss.getSheetByName("Trận đấu");
+  var sheetBet = ss.getSheetByName("Đặt cược");
+  var sheetData = ss.getSheetByName("Data");
+
+  var userData = sheetData
+    .getRange("A2:C50")
+    .getValues();
+
+  var userColChar = "";
+
+  for (var i = 0; i < userData.length; i++) {
+    if (userData[i][0] == email) {
+      userColChar = userData[i][2];
+      break;
+    }
+  }
+
+  if (userColChar === "") {
+    return [];
+  }
+
+  var userColNum = columnLetterToNumber(userColChar);
+
+  var infoRange = sheetInfo
+    .getRange(3, 1, 100, 16)
+    .getValues();
+
+  var userBets = sheetBet
+    .getRange(3, userColNum, 100, 1)
+    .getValues();
+
+  var results = [];
+
+  for (var j = 0; j < infoRange.length; j++) {
+    if (
+      infoRange[j][0] !== "" &&
+      infoRange[j][8] === "Chưa đá"
+    ) {
+      var row = infoRange[j];
+      row.push(String(userBets[j][0] || "").trim());
+      results.push(row);
+    }
+  }
+
+  return results;
+}
+
+function submitBet(email, stt, choice) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var sheetInfo = ss.getSheetByName("Trận đấu");
+  var sheetBet = ss.getSheetByName("Đặt cược");
+  var sheetData = ss.getSheetByName("Data");
+
+  var userData = sheetData
+    .getRange("A2:C50")
+    .getValues();
+
+  var userName = "Người chơi";
+  var userColChar = "";
+
+  for (var i = 0; i < userData.length; i++) {
+    if (userData[i][0] == email) {
+      userName = userData[i][1];
+      userColChar = userData[i][2];
+      break;
+    }
+  }
+
+  if (userColChar === "") {
+    return "Lỗi: Tài khoản chưa cấu hình cột!";
+  }
+
+  var userColNum = columnLetterToNumber(userColChar);
+
+  var dataInfo = sheetInfo
+    .getRange("A3:P100")
+    .getValues();
+
+  var row = -1;
+  var matchData = null;
+
+  for (var j = 0; j < dataInfo.length; j++) {
+    if (dataInfo[j][0] == stt) {
+      row = j + 3;
+      matchData = dataInfo[j];
+      break;
+    }
+  }
+
+  if (row == -1) {
+    return "Lỗi: Không tìm thấy trận đấu!";
+  }
+
+  var matchTime = new Date(matchData[3]);
+
+  if (
+    new Date() >
+    new Date(matchTime.getTime() - 60 * 60 * 1000)
+  ) {
+    return "❌ Đã quá thời gian!";
+  }
+
+  sheetBet
+    .getRange(row, userColNum)
+    .setValue(choice);
+
+  // try {
+  //   MailApp.sendEmail(
+  //     email,
+  //     "Thông báo bình chọn: " +
+  //       matchData[4] +
+  //       " vs " +
+  //       matchData[5],
+
+  //     "Xác nhận: " +
+  //       userName +
+  //       ", bạn đã chọn " +
+  //       choice +
+  //       " cho trận " +
+  //       matchData[4] +
+  //       " vs " +
+  //       matchData[5]
+  //   );
+  // } catch (e) {}
+
+  return "✅ Đã xác nhận: " + choice;
+}
+
+// --- HÀM LẤY CÁC TRẬN QUÁ KHỨ MỚI THÊM VÀO ---
+function getPastMatches(email) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var sheetInfo = ss.getSheetByName("Trận đấu");
+  var sheetBet = ss.getSheetByName("Đặt cược");
+  var sheetData = ss.getSheetByName("Data");
+
+  var userData = sheetData
+    .getRange("A2:C50")
+    .getValues();
+
+  var userColChar = "";
+
+  for (var i = 0; i < userData.length; i++) {
+    if (userData[i][0] == email) {
+      userColChar = userData[i][2];
+      break;
+    }
+  }
+
+  if (userColChar === "") {
+    return [];
+  }
+
+  var userColNum = columnLetterToNumber(userColChar);
+
+  var infoRange = sheetInfo
+    .getRange(3, 1, 100, 16)
+    .getValues();
+
+  var userBets = sheetBet
+    .getRange(3, userColNum, 100, 1)
+    .getValues();
+
+  var results = [];
+
+  for (var j = 0; j < infoRange.length; j++) {
+    // Điều kiện: Lấy những trận đã có số STT và Trạng thái KHÁC "Chưa đá"
+    if (
+      infoRange[j][0] !== "" &&
+      infoRange[j][8] !== "Chưa đá"
+    ) {
+      var row = infoRange[j];
+      row.push(String(userBets[j][0] || "").trim());
+      results.push(row);
+    }
+  }
+
+  return results;
+}
+
+// --- HÀM LẤY DỮ LIỆU BẢNG VÀNG ---
+function getLeaderboard() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Bảng vàng"); 
+  var sheetInfo = ss.getSheetByName("Trận đấu");
+  var sheetBet = ss.getSheetByName("Đặt cược");
+  var sheetData = ss.getSheetByName("Data");
+  
+  if (!sheet) return { error: "Không tìm thấy sheet Bảng vàng" };
+
+  var dataRange = sheet.getRange("A3:L50").getValues();
+  var leaderboard = [];
+
+  // Lấy dữ liệu Trận đấu và Đặt cược để tính danh hiệu
+  var infoRange = sheetInfo ? sheetInfo.getRange(3, 1, 100, 16).getValues() : [];
+  var betRange = sheetBet ? sheetBet.getRange(3, 1, 100, 50).getValues() : [];
+  var userData = sheetData ? sheetData.getRange("A2:C50").getValues() : [];
+
+  // Xây dựng object user để lưu các chỉ số tính danh hiệu
+  var userStats = {};
+  for (var u = 0; u < userData.length; u++) {
+    if (userData[u][0]) {
+      userStats[userData[u][1]] = { 
+        colChar: String(userData[u][2]).trim(),
+        cuaDuoiCount: 0,
+        nguocDongPoints: 0
+      };
+    }
+  }
+  
+  for (var pName in userStats) {
+    if (userStats[pName].colChar) {
+      userStats[pName].colIndex = columnLetterToNumber(userStats[pName].colChar) - 1;
+    }
+  }
+
+  // Tính toán chỉ số Tâm Linh và Ngược Dòng
+  for (var j = 0; j < infoRange.length; j++) {
+    var stt = infoRange[j][0];
+    if (stt === "") continue;
+    
+    var homeTeam  = String(infoRange[j][4]  || "").trim();
+    var awayTeam  = String(infoRange[j][5]  || "").trim();
+    var upperTeam = String(infoRange[j][12] || "").trim();
+    var matchStatus = String(infoRange[j][8] || "").trim();
+    
+    var winningTeam = String(infoRange[j][10] || "").trim();
+    var actualWinningChoice = "";
+    if (winningTeam && matchStatus.includes("Kết thúc")) {
+      actualWinningChoice = winningTeam === upperTeam ? "Cửa trên" : "Cửa dưới";
+    }
+
+    var upperCount = 0;
+    var lowerCount = 0;
+    var totalBets = 0;
+    var matchBets = {};
+
+    for (var pName in userStats) {
+      var cIdx = userStats[pName].colIndex;
+      if (cIdx >= 0 && betRange[j] && betRange[j][cIdx]) {
+        var betVal = String(betRange[j][cIdx]).trim();
+        matchBets[pName] = betVal;
+        
+        if (betVal === "Cửa dưới") userStats[pName].cuaDuoiCount++;
+        
+        if (betVal === "Cửa trên") upperCount++;
+        else if (betVal === "Cửa dưới") lowerCount++;
+        
+        totalBets++;
+      }
+    }
+
+    // Trận có kết quả và có người cược
+    if (actualWinningChoice && totalBets > 0) {
+      var winningChoiceCount = (actualWinningChoice === "Cửa trên") ? upperCount : lowerCount;
+      var winningPct = winningChoiceCount / totalBets;
+      
+      // Nếu số người chọn ĐÚNG <= 30% (tức >= 70% chọn sai) => Trận cú lừa
+      if (winningPct <= 0.3) {
+        for (var pName in matchBets) {
+          if (matchBets[pName] === actualWinningChoice) {
+            userStats[pName].nguocDongPoints++;
+          }
+        }
+      }
+    }
+  }
+
+  for (var i = 0; i < dataRange.length; i++) {
+    var playerName = String(dataRange[i][0]).trim();
+    if (playerName === "") continue; 
+
+    var wins   = Number(dataRange[i][4]) || 0;
+    var losses = Number(dataRange[i][5]) || 0;
+    var total  = wins + losses;
+    var totalScore = Number(dataRange[i][2]) || 0;
+
+    var winRate  = total > 0 ? wins  / total : 0;
+    var loseRate = total > 0 ? losses / total : 0;
+    
+    var maxWinStreak = Number(dataRange[i][10]) || 0;
+    var maxLoseStreak = Number(dataRange[i][11]) || 0;
+
+    leaderboard.push({
+      name:               playerName,
+      rank:               dataRange[i][1],
+      totalScore:         totalScore,
+      winMatches:         wins,
+      loseMatches:        losses,
+      winRate:            winRate,
+      loseRate:           loseRate,
+      currentWinStreak:   dataRange[i][8],
+      currentLoseStreak:  dataRange[i][9],
+      maxWinStreak:       maxWinStreak,
+      maxLoseStreak:      maxLoseStreak,
+      badges:             [],
+      _cuaDuoiCount:      userStats[playerName] ? userStats[playerName].cuaDuoiCount : 0,
+      _nguocDongPoints:   userStats[playerName] ? userStats[playerName].nguocDongPoints : 0
+    });
+  }
+
+  // Xếp hạng lại theo yêu cầu:
+  leaderboard.sort(function(a, b) {
+    var scoreDiff = Number(b.totalScore || 0) - Number(a.totalScore || 0);
+    if (scoreDiff !== 0) return scoreDiff;
+    
+    var winStreakDiff = Number(b.maxWinStreak || 0) - Number(a.maxWinStreak || 0);
+    if (winStreakDiff !== 0) return winStreakDiff;
+    
+    var loseStreakDiff = Number(a.maxLoseStreak || 0) - Number(b.maxLoseStreak || 0);
+    return loseStreakDiff;
+  });
+
+  // Cập nhật lại thuộc tính rank
+  for (var j = 0; j < leaderboard.length; j++) {
+    if (j > 0) {
+      var prev = leaderboard[j - 1];
+      var curr = leaderboard[j];
+      if (
+        Number(curr.totalScore || 0) === Number(prev.totalScore || 0) &&
+        Number(curr.maxWinStreak || 0) === Number(prev.maxWinStreak || 0) &&
+        Number(curr.maxLoseStreak || 0) === Number(prev.maxLoseStreak || 0)
+      ) {
+        curr.rank = prev.rank;
+      } else {
+        curr.rank = j + 1;
+      }
+    } else {
+      leaderboard[j].rank = 1;
+    }
+  }
+
+  // Trao danh hiệu
+  var highestMaxWinStreak = -1;
+  var highestMaxLoseStreak = -1;
+  var lowestScore = 999999;
+  var highestCuaDuoi = -1;
+  var highestNguocDong = -1;
+
+  for (var k = 0; k < leaderboard.length; k++) {
+    var p = leaderboard[k];
+    if (p.maxWinStreak > highestMaxWinStreak) highestMaxWinStreak = p.maxWinStreak;
+    if (p.maxLoseStreak > highestMaxLoseStreak) highestMaxLoseStreak = p.maxLoseStreak;
+    if (p.totalScore < lowestScore) lowestScore = p.totalScore;
+    if (p._cuaDuoiCount > highestCuaDuoi) highestCuaDuoi = p._cuaDuoiCount;
+    if (p._nguocDongPoints > highestNguocDong) highestNguocDong = p._nguocDongPoints;
+  }
+
+  for (var k = 0; k < leaderboard.length; k++) {
+    var p = leaderboard[k];
+    if (highestMaxWinStreak >= 3 && p.maxWinStreak === highestMaxWinStreak) {
+      p.badges.push("🔮 Thánh Tiên Tri");
+    }
+    if (highestMaxLoseStreak >= 3 && p.maxLoseStreak === highestMaxLoseStreak) {
+      p.badges.push("🐧 Pele Nhập");
+    }
+    if (lowestScore < 0 && p.totalScore === lowestScore) {
+      p.badges.push("💸 Nhà Từ Thiện");
+    }
+    if (highestCuaDuoi >= 5 && p._cuaDuoiCount === highestCuaDuoi) {
+      p.badges.push("🙏 Hệ Tâm Linh");
+    }
+    if (highestNguocDong >= 1 && p._nguocDongPoints === highestNguocDong) {
+      p.badges.push("🐟 Trùm Ngược Dòng");
+    }
+  }
+
+  return leaderboard;
+}
+
+function columnLetterToNumber(col) {
+  var out = 0;
+
+  for (var i = 0; i < col.length; i++) {
+    out =
+      out * 26 +
+      (col.charCodeAt(i) - 64);
+  }
+
+  return out;
+}
+
+// --- HÀM LẤY CHI TIẾT BÌNH CHỌN CỦA TẤT CẢ NGƯỜI CHƠI CHO 1 TRẬN ---
+function getMatchDetail(stt) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetBet  = ss.getSheetByName("Đặt cược");
+  var sheetData = ss.getSheetByName("Data");
+
+  if (!sheetBet || !sheetData) return { error: "Không tìm thấy sheet" };
+
+  // Lấy danh sách tất cả người chơi (email, tên, cột bình chọn)
+  var userData = sheetData.getRange("A2:C50").getValues();
+
+  // Tìm dòng tương ứng với STT trong sheet Đặt cược (cột A, dữ liệu từ hàng 3)
+  var sttValues = sheetBet.getRange(3, 1, 100, 1).getValues();
+  var matchRow  = -1;
+
+  for (var j = 0; j < sttValues.length; j++) {
+    if (String(sttValues[j][0]).trim() === String(stt).trim()) {
+      matchRow = j + 3; // row number 1-indexed trong spreadsheet
+      break;
+    }
+  }
+
+  if (matchRow === -1) return { error: "Không tìm thấy trận #" + stt };
+
+  var result = [];
+
+  for (var i = 0; i < userData.length; i++) {
+    var email   = userData[i][0];
+    var name    = userData[i][1];
+    var colChar = String(userData[i][2] || "").trim();
+
+    if (!email || !colChar) continue;
+
+    var colNum = columnLetterToNumber(colChar);
+    var choice = String(sheetBet.getRange(matchRow, colNum).getValue() || "").trim();
+
+    result.push({ name: name, choice: choice });
+  }
+
+  return result;
+}
+
+// --- HÀM ĐỒNG BỘ TỶ SỐ TRỰC TIẾP TỪ FOOTBALL-DATA.ORG ---
+function syncLiveScores() {
+  var API_TOKEN = "53fcbf73996344a5889d2f8fd6830192";
+  // Bạn có thể thêm tham số query để chỉ lấy những trận hôm nay
+  var url = "https://api.football-data.org/v4/matches"; 
+  
+  var options = {
+    "method": "get",
+    "headers": {
+      "X-Auth-Token": API_TOKEN
+    },
+    "muteHttpExceptions": true
+  };
+
+  try {
+    var response = UrlFetchApp.fetch(url, options);
+    var data = JSON.parse(response.getContentText());
+    
+    if (!data.matches || data.matches.length === 0) return;
+
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheetInfo = ss.getSheetByName("Trận đấu");
+    var infoRange = sheetInfo.getRange("A3:P100").getValues();
+
+    // Từ điển map tên tiếng Anh sang tiếng Việt (Google Sheet)
+    // Cần bổ sung nếu tên trong Sheet khác với tên tiếng Việt ở đây
+    // Bảng quy đổi cho các đội bóng nếu API trả về tên tiếng Anh khác với Google Sheet
+    var teamDictionary = {
+      "United States": "USA",
+      "Bosnia-Herzegovina": "Bosnia & Herzegovina",
+      "Cape Verde Islands": "Cape Verde",
+      "Congo DR": "DR Congo",
+      "Czechia": "Czech Republic"
+    };
+
+    var getVnName = function(enName) {
+      // Vì sheet dùng tên tiếng Anh, ta sẽ lấy tên gốc từ API, 
+      // chỉ đổi tên ở những trường hợp API viết khác sheet (như USA vs United States)
+      return teamDictionary[enName] || enName;
+    };
+
+    for (var i = 0; i < data.matches.length; i++) {
+      var match = data.matches[i];
+      
+      // Chỉ quan tâm trận đang đá, tạm dừng hoặc vừa kết thúc
+      if (match.status === "IN_PLAY" || match.status === "PAUSED" || match.status === "FINISHED") {
+        var apiHome = getVnName(match.homeTeam.name);
+        var apiAway = getVnName(match.awayTeam.name);
+        
+        var homeScore = match.score.fullTime.home !== null ? match.score.fullTime.home : 0;
+        var awayScore = match.score.fullTime.away !== null ? match.score.fullTime.away : 0;
+
+        // Dò trong sheet để cập nhật
+        for (var j = 0; j < infoRange.length; j++) {
+          var sheetHome = String(infoRange[j][4]).trim();
+          var sheetAway = String(infoRange[j][5]).trim();
+          var sheetStatus = String(infoRange[j][8]).trim();
+          
+          if (sheetHome === apiHome && sheetAway === apiAway) {
+            // Nếu trận đã kết thúc và sheet cũng đã ghi nhận thì bỏ qua để không tốn thời gian ghi
+            if (match.status === "FINISHED" && (sheetStatus === "Kết thúc" || sheetStatus === "Đã kết thúc" || sheetStatus === "Đã xong")) {
+              break;
+            }
+
+            var row = j + 3;
+            // Update score (Cột G & H)
+            sheetInfo.getRange(row, 7).setValue(homeScore); 
+            sheetInfo.getRange(row, 8).setValue(awayScore); 
+            
+            // Cập nhật trạng thái vào cột I (Cột 9)
+            var newStatus = match.status === "FINISHED" ? "Kết thúc" : "Đang đá";
+            sheetInfo.getRange(row, 9).setValue(newStatus);
+            break;
+          }
+        }
+      }
+    }
+  } catch(e) {
+    console.error("Live score sync failed:", e);
+  }
+}
+
+// --- HÀM HỖ TRỢ TỰ ĐỘNG CÀI ĐẶT TRIGGER CẬP NHẬT TỈ SỐ ---
+function setupAutoSyncTrigger() {
+  // Xóa các trigger cũ nếu có để tránh trùng lặp
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === "syncLiveScores") {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  
+  // Tạo trigger mới chạy mỗi 1 phút
+  ScriptApp.newTrigger("syncLiveScores")
+           .timeBased()
+           .everyMinutes(1)
+           .create();
+           
+  return "Đã cài đặt tự động cập nhật tỉ số mỗi 1 phút thành công!";
+}
