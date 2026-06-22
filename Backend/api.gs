@@ -508,6 +508,43 @@ function getMatchDetail(stt) {
 
 // --- HÀM ĐỒNG BỘ TỶ SỐ TRỰC TIẾP TỪ FOOTBALL-DATA.ORG ---
 function syncLiveScores() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetInfo = ss.getSheetByName("Trận đấu");
+  
+  // Đọc dữ liệu nhanh từ Sheet trước để kiểm tra trạng thái
+  var infoRange = sheetInfo.getRange("A3:P100").getValues();
+  var shouldFetchApi = false;
+  var now = new Date();
+  
+  for (var j = 0; j < infoRange.length; j++) {
+    var stt = String(infoRange[j][0]).trim();
+    if (stt === "") continue;
+    
+    var timeRaw = infoRange[j][3];
+    var matchTime;
+    if (timeRaw instanceof Date) {
+      matchTime = timeRaw;
+    } else {
+      var timeStr = String(timeRaw).trim();
+      var m = timeStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
+      if (m) {
+        matchTime = new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]), parseInt(m[4]), parseInt(m[5]));
+      } else {
+        matchTime = new Date(timeStr);
+      }
+    }
+    
+    var matchStatus = String(infoRange[j][8]).trim();
+    
+    if (matchStatus === "Đang đá" || (matchStatus === "Chưa đá" && matchTime <= now)) {
+      shouldFetchApi = true;
+      break;
+    }
+  }
+  
+  // Thoát ngay nếu không có trận nào đang diễn ra hoặc đến giờ đá
+  if (!shouldFetchApi) return;
+
   var API_TOKEN = "53fcbf73996344a5889d2f8fd6830192";
   // Bạn có thể thêm tham số query để chỉ lấy những trận hôm nay
   var url = "https://api.football-data.org/v4/matches"; 
@@ -525,10 +562,6 @@ function syncLiveScores() {
     var data = JSON.parse(response.getContentText());
     
     if (!data.matches || data.matches.length === 0) return;
-
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheetInfo = ss.getSheetByName("Trận đấu");
-    var infoRange = sheetInfo.getRange("A3:P100").getValues();
 
     // Từ điển map tên tiếng Anh sang tiếng Việt (Google Sheet)
     // Cần bổ sung nếu tên trong Sheet khác với tên tiếng Việt ở đây
