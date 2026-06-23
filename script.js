@@ -888,10 +888,14 @@ function openMatchDetail(stt) {
       }
 
       var upperCount = votes.filter(function (v) {
-        return v.choice === "Cửa trên";
+        var raw = String(v.choice || "");
+        var cleaned = raw.replace(/⭐\d+/, "").trim();
+        return cleaned === "Cửa trên";
       }).length;
       var lowerCount = votes.filter(function (v) {
-        return v.choice === "Cửa dưới";
+        var raw = String(v.choice || "");
+        var cleaned = raw.replace(/⭐\d+/, "").trim();
+        return cleaned === "Cửa dưới";
       }).length;
       var total = votes.length;
       var upperPct = total > 0 ? Math.round((upperCount / total) * 100) : 0;
@@ -918,24 +922,49 @@ function openMatchDetail(stt) {
 
       var votesHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">';
       votes.forEach(function (v) {
+        var raw = String(v.choice || "");
+        var starMatch = raw.match(/⭐(\d+)/);
+        var voteStar = starMatch ? parseInt(starMatch[1]) : null;
+        var cleaned = raw.replace(/⭐\d+/, "").trim();
+
         var isCorrect =
-          actualWinningChoice && actualWinningChoice !== "Hòa" && v.choice === actualWinningChoice;
+          actualWinningChoice && actualWinningChoice !== "Hòa" && cleaned === actualWinningChoice;
         var isWrong =
           actualWinningChoice &&
           actualWinningChoice !== "Hòa" &&
-          v.choice &&
-          v.choice !== actualWinningChoice;
+          cleaned &&
+          cleaned !== actualWinningChoice;
         var isDraw = actualWinningChoice === "Hòa";
-        var choiceLabel =
-          v.choice === "Cửa trên"
-            ? "▲ " + upperTeam
-            : v.choice === "Cửa dưới"
-              ? "▼ " + lowerTeam
-              : "—";
+
+        var choiceLabel = "—";
+        // If vote used a hope-star
+        if (voteStar) {
+          if (!showStarNumber) {
+            // Before match finished (and not in Past tab): show only star+points
+            choiceLabel = `⭐${voteStar}`;
+          } else {
+            // After match finished or viewing from Past tab: show full team + star
+            choiceLabel =
+              cleaned === "Cửa trên"
+                ? `▲ ${upperTeam} ⭐${voteStar}`
+                : cleaned === "Cửa dưới"
+                  ? `▼ ${lowerTeam} ⭐${voteStar}`
+                  : `⭐${voteStar}`;
+          }
+        } else {
+          // No star used, show normal team label
+          choiceLabel =
+            cleaned === "Cửa trên"
+              ? "▲ " + upperTeam
+              : cleaned === "Cửa dưới"
+                ? "▼ " + lowerTeam
+                : "—";
+        }
+
         var choiceClass =
-          v.choice === "Cửa trên"
+          cleaned === "Cửa trên"
             ? "text-emerald-700 bg-emerald-50 border border-emerald-100"
-            : v.choice === "Cửa dưới"
+            : cleaned === "Cửa dưới"
               ? "text-blue-700 bg-blue-50 border border-blue-100"
               : "text-gray-400 bg-gray-50 border border-gray-100";
         var cardClass = isCorrect
