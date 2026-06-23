@@ -109,14 +109,23 @@ function switchTab(tabName) {
   const btnPast = document.getElementById("btnPastMatches");
   const btnLeader = document.getElementById("btnLeaderboard");
 
-  btnActive.className = "pb-3 px-1 text-sm whitespace-nowrap transition-all " + 
-    (tabName === 'active' ? "font-bold text-[#0F5132] border-b-4 border-[#0F5132]" : "font-semibold text-gray-400 hover:text-gray-600");
-    
-  btnPast.className = "pb-3 px-1 text-sm whitespace-nowrap transition-all " + 
-    (tabName === 'past' ? "font-bold text-[#0F5132] border-b-4 border-[#0F5132]" : "font-semibold text-gray-400 hover:text-gray-600");
-    
-  btnLeader.className = "pb-3 px-1 text-sm whitespace-nowrap transition-all " + 
-    (tabName === 'leaderboard' ? "font-bold text-[#0F5132] border-b-4 border-[#0F5132]" : "font-semibold text-gray-400 hover:text-gray-600");
+  btnActive.className =
+    "pb-3 px-1 text-sm whitespace-nowrap transition-all " +
+    (tabName === "active"
+      ? "font-bold text-[#0F5132] border-b-4 border-[#0F5132]"
+      : "font-semibold text-gray-400 hover:text-gray-600");
+
+  btnPast.className =
+    "pb-3 px-1 text-sm whitespace-nowrap transition-all " +
+    (tabName === "past"
+      ? "font-bold text-[#0F5132] border-b-4 border-[#0F5132]"
+      : "font-semibold text-gray-400 hover:text-gray-600");
+
+  btnLeader.className =
+    "pb-3 px-1 text-sm whitespace-nowrap transition-all " +
+    (tabName === "leaderboard"
+      ? "font-bold text-[#0F5132] border-b-4 border-[#0F5132]"
+      : "font-semibold text-gray-400 hover:text-gray-600");
 
   // Xử lý ẩn hiện bảng phù hợp với tab được chọn
   if (tabName === "leaderboard") {
@@ -274,12 +283,13 @@ function renderMatches() {
     var awayTeam = String(row[5] || "").trim();
     var homeScore = row[6] !== "" ? row[6] : "";
     var awayScore = row[7] !== "" ? row[7] : "";
-    
+
     var matchStatus = String(row[8] || "").trim();
-    var liveIndicator = matchStatus === "Đang đá" 
-      ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-600 animate-pulse"><span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span>LIVE</span>` 
-      : "";
-    
+    var liveIndicator =
+      matchStatus === "Đang đá"
+        ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-600 animate-pulse"><span class="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5"></span>LIVE</span>`
+        : "";
+
     var scoreDisplay =
       homeScore !== "" && awayScore !== ""
         ? ` <span class="text-[#e53e3e] font-extrabold mx-1">${homeScore} - ${awayScore}</span> `
@@ -352,12 +362,18 @@ function renderMatches() {
         ? ` <span class="text-amber-500 font-bold ml-1.5 text-xs animate-pulse" title="Bạn chưa chọn kèo!"><i class="ti ti-alert-triangle"></i></span>`
         : "";
 
-    var homeBadge = homeTeam === upperTeam ? ' <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-50 text-amber-700 border border-amber-200 ml-1.5"><i class="ti ti-star-filled mr-0.5 text-amber-500"></i>KÈO TRÊN</span>' : '';
-    var awayBadge = awayTeam === upperTeam ? ' <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-50 text-amber-700 border border-amber-200 ml-1.5"><i class="ti ti-star-filled mr-0.5 text-amber-500"></i>KÈO TRÊN</span>' : '';
+    var homeBadge =
+      homeTeam === upperTeam
+        ? ' <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-50 text-amber-700 border border-amber-200 ml-1.5"><i class="ti ti-star-filled mr-0.5 text-amber-500"></i>KÈO TRÊN</span>'
+        : "";
+    var awayBadge =
+      awayTeam === upperTeam
+        ? ' <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-50 text-amber-700 border border-amber-200 ml-1.5"><i class="ti ti-star-filled mr-0.5 text-amber-500"></i>KÈO TRÊN</span>'
+        : "";
 
     if (currentTab === "past") {
       matchDataCache[row[0]] = row;
-      
+
       tbody.innerHTML += `
         <div onclick="openMatchDetail(${row[0]})" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden match-card p-6 flex flex-col md:flex-row items-center justify-between gap-6 cursor-pointer hover:bg-emerald-50/10 hover:border-emerald-100 transition-all fade-in-up">
           <div class="flex flex-col md:flex-row items-center gap-6 flex-1 justify-center md:justify-start">
@@ -396,10 +412,10 @@ function renderMatches() {
 
           <div class="flex gap-2 w-full md:w-auto">
             <button class="flex-1 md:w-28 py-2.5 rounded-xl border border-gray-100 text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa trên" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
-              ▲ ${upperTeam} ${(betValue === "Cửa trên" && hasHopeStar) ? `⭐${usedStarOnThisMatch}` : ""}
+              ▲ ${upperTeam}${betValue === "Cửa trên" && hasHopeStar ? " ⭐ " + usedStarOnThisMatch : ""}
             </button>
             <button class="flex-1 md:w-28 py-2.5 rounded-xl border border-gray-100 text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa dưới" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
-              ▼ ${lowerTeam} ${(betValue === "Cửa dưới" && hasHopeStar) ? `⭐${usedStarOnThisMatch}` : ""}
+              ▼ ${lowerTeam}${betValue === "Cửa dưới" && hasHopeStar ? " ⭐ " + usedStarOnThisMatch : ""}
             </button>
           </div>
         </div>
@@ -447,18 +463,18 @@ function renderMatches() {
           <div class="flex flex-col gap-2 w-full md:w-auto items-end">
             <div class="flex gap-2 w-full md:w-auto">
               <button id="btn-u-${row[0]}" onclick="bet(this, ${row[0]}, 'Cửa trên')" class="flex-1 md:w-32 py-2.5 rounded-xl border-2 border-gray-100 text-gray-600 font-bold text-sm bg-white hover:border-[#0F5132] hover:text-[#0F5132] transition-all btn-choice ${betValue === "Cửa trên" ? "selected" : ""}" ${isDisabled}>
-                ▲ ${upperTeam}
+                ▲ ${upperTeam}${betValue === "Cửa trên" && hasHopeStar ? " ⭐ " + usedStarOnThisMatch : ""}
               </button>
               <button id="btn-d-${row[0]}" onclick="bet(this, ${row[0]}, 'Cửa dưới')" class="flex-1 md:w-32 py-2.5 rounded-xl border-2 border-gray-100 text-gray-600 font-bold text-sm bg-white hover:border-[#0F5132] hover:text-[#0F5132] transition-all btn-choice ${betValue === "Cửa dưới" ? "selected" : ""}" ${isDisabled}>
-                ▼ ${lowerTeam}
+                  ▼ ${lowerTeam}${betValue === "Cửa dưới" && hasHopeStar ? " ⭐ " + usedStarOnThisMatch : ""}
               </button>
             </div>
             <select id="star-select-${row[0]}" class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5 outline-none cursor-pointer mt-1 hover:bg-amber-100 transition-colors w-full md:w-auto" ${isDisabled}>
               <option value="">Bình thường (10đ)</option>
-              <option value="20" ${usedStarOnThisMatch === 20 ? 'selected' : (!currentAvailableStars.includes(20) ? 'disabled' : '')}>⭐ 20 điểm ${!currentAvailableStars.includes(20) && usedStarOnThisMatch !== 20 ? '(Đã dùng)' : ''}</option>
-              <option value="30" ${usedStarOnThisMatch === 30 ? 'selected' : (!currentAvailableStars.includes(30) ? 'disabled' : '')}>⭐ 30 điểm ${!currentAvailableStars.includes(30) && usedStarOnThisMatch !== 30 ? '(Đã dùng)' : ''}</option>
-              <option value="40" ${usedStarOnThisMatch === 40 ? 'selected' : (!currentAvailableStars.includes(40) ? 'disabled' : '')}>⭐ 40 điểm ${!currentAvailableStars.includes(40) && usedStarOnThisMatch !== 40 ? '(Đã dùng)' : ''}</option>
-              <option value="50" ${usedStarOnThisMatch === 50 ? 'selected' : (!currentAvailableStars.includes(50) ? 'disabled' : '')}>⭐ 50 điểm ${!currentAvailableStars.includes(50) && usedStarOnThisMatch !== 50 ? '(Đã dùng)' : ''}</option>
+              <option value="20" ${usedStarOnThisMatch === 20 ? "selected" : !currentAvailableStars.includes(20) ? "disabled" : ""}>⭐ 20 điểm ${!currentAvailableStars.includes(20) && usedStarOnThisMatch !== 20 ? "(Đã dùng)" : ""}</option>
+              <option value="30" ${usedStarOnThisMatch === 30 ? "selected" : !currentAvailableStars.includes(30) ? "disabled" : ""}>⭐ 30 điểm ${!currentAvailableStars.includes(30) && usedStarOnThisMatch !== 30 ? "(Đã dùng)" : ""}</option>
+              <option value="40" ${usedStarOnThisMatch === 40 ? "selected" : !currentAvailableStars.includes(40) ? "disabled" : ""}>⭐ 40 điểm ${!currentAvailableStars.includes(40) && usedStarOnThisMatch !== 40 ? "(Đã dùng)" : ""}</option>
+              <option value="50" ${usedStarOnThisMatch === 50 ? "selected" : !currentAvailableStars.includes(50) ? "disabled" : ""}>⭐ 50 điểm ${!currentAvailableStars.includes(50) && usedStarOnThisMatch !== 50 ? "(Đã dùng)" : ""}</option>
             </select>
           </div>
         </div>
@@ -588,10 +604,12 @@ function showToast(msg) {
   var x = document.getElementById("toast");
 
   x.innerText = msg;
-  x.className = "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 min-w-[300px] bg-slate-900 text-white text-center rounded-xl p-4 shadow-2xl text-sm font-medium visible opacity-1 show";
+  x.className =
+    "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 min-w-[300px] bg-slate-900 text-white text-center rounded-xl p-4 shadow-2xl text-sm font-medium visible opacity-1 show";
 
   setTimeout(() => {
-    x.className = "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 min-w-[300px] bg-slate-900 text-white text-center rounded-xl p-4 shadow-2xl text-sm font-medium invisible opacity-0 transition-all duration-300";
+    x.className =
+      "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 min-w-[300px] bg-slate-900 text-white text-center rounded-xl p-4 shadow-2xl text-sm font-medium invisible opacity-0 transition-all duration-300";
   }, 3000);
 }
 
@@ -694,7 +712,7 @@ function manualRefresh() {
   if (!btn || btn.disabled) return;
 
   btn.disabled = true;
-  const icon = btn.querySelector('i');
+  const icon = btn.querySelector("i");
   if (icon) icon.classList.add("animate-spin");
 
   if (currentTab === "leaderboard") {
@@ -800,9 +818,9 @@ function openMatchDetail(stt) {
 
   var myChoiceLabel =
     betValue === "Cửa trên"
-      ? "▲ " + upperTeam + (hasHopeStar ? ` ⭐${usedStarOnThisMatch}` : "")
+      ? "▲ " + upperTeam + (hasHopeStar ? " ⭐ " + usedStarOnThisMatch : "")
       : betValue === "Cửa dưới"
-        ? "▼ " + lowerTeam + (hasHopeStar ? ` ⭐${usedStarOnThisMatch}` : "")
+        ? "▼ " + lowerTeam + (hasHopeStar ? " ⭐ " + usedStarOnThisMatch : "")
         : "Chưa chọn";
 
   var resultLabel =
@@ -890,8 +908,13 @@ function openMatchDetail(stt) {
 
       var votesHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">';
       votes.forEach(function (v) {
-        var isCorrect = actualWinningChoice && actualWinningChoice !== "Hòa" && v.choice === actualWinningChoice;
-        var isWrong = actualWinningChoice && actualWinningChoice !== "Hòa" && v.choice && v.choice !== actualWinningChoice;
+        var isCorrect =
+          actualWinningChoice && actualWinningChoice !== "Hòa" && v.choice === actualWinningChoice;
+        var isWrong =
+          actualWinningChoice &&
+          actualWinningChoice !== "Hòa" &&
+          v.choice &&
+          v.choice !== actualWinningChoice;
         var isDraw = actualWinningChoice === "Hòa";
         var choiceLabel =
           v.choice === "Cửa trên"
@@ -905,10 +928,10 @@ function openMatchDetail(stt) {
             : v.choice === "Cửa dưới"
               ? "text-blue-700 bg-blue-50 border border-blue-100"
               : "text-gray-400 bg-gray-50 border border-gray-100";
-        var cardClass = isCorrect 
-          ? "border-green-200 bg-green-50/50" 
-          : isWrong 
-            ? "border-red-200 bg-red-50/50" 
+        var cardClass = isCorrect
+          ? "border-green-200 bg-green-50/50"
+          : isWrong
+            ? "border-red-200 bg-red-50/50"
             : isDraw
               ? "border-yellow-200 bg-yellow-50/50"
               : "border-gray-100 bg-white";
@@ -959,7 +982,7 @@ function closeMatchDetail() {
 }
 
 // Đóng modal khi click ra ngoài vùng nội dung
-document.addEventListener("click", function(event) {
+document.addEventListener("click", function (event) {
   var modal = document.getElementById("matchDetailModal");
   if (modal && modal.classList.contains("show")) {
     if (event.target === modal || event.target.id === "rainContainer") {
@@ -968,7 +991,7 @@ document.addEventListener("click", function(event) {
   }
 });
 
-document.addEventListener("keydown", function(event) {
+document.addEventListener("keydown", function (event) {
   if (event.key === "Escape") {
     var modal = document.getElementById("matchDetailModal");
     if (modal && modal.classList.contains("show")) {
@@ -1053,7 +1076,7 @@ let liveScoreInterval;
 
 function startLiveScoreAutoRefresh() {
   if (liveScoreInterval) clearInterval(liveScoreInterval);
-  
+
   liveScoreInterval = setInterval(() => {
     if (currentTab === "active") {
       loadData(false); // pass false to avoid showing the loader
