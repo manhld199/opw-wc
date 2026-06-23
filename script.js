@@ -781,10 +781,9 @@ function openMatchDetail(stt) {
 
   var matchStatusDetail = String(row[8] || "").trim();
   var actualWinningChoice = "";
-  // Hiển thị số sao khi trận kết thúc hoặc khi mở modal từ tab 'past'
-  var showStarNumber =
-    String(matchStatusDetail || "").includes("Kết thúc") || currentTab === "past";
-  if (winningTeam && matchStatusDetail.includes("Kết thúc")) {
+
+  // Determine actual winning choice only when the match status indicates finished
+  if (winningTeam && String(matchStatusDetail || "").includes("Kết thúc")) {
     var hScoreNum = parseFloat(row[6]);
     var aScoreNum = parseFloat(row[7]);
     var hCapNum = parseFloat(row[13]);
@@ -798,6 +797,10 @@ function openMatchDetail(stt) {
       else actualWinningChoice = winningTeam === upperTeam ? "Cửa trên" : "Cửa dưới";
     }
   }
+
+  // Hiển thị số sao khi trận đã có `actualWinningChoice` (tức đã kết thúc)
+  // hoặc khi mở modal từ tab 'past' (luôn hiển thị đầy đủ trong lịch sử)
+  var showStarNumber = !!actualWinningChoice || currentTab === "past";
 
   var scoreStr =
     homeScore !== "" && awayScore !== ""
@@ -821,8 +824,9 @@ function openMatchDetail(stt) {
 
   var starSuffix = hasHopeStar ? (showStarNumber ? ` ⭐${usedStarOnThisMatch}` : " ⭐") : "";
   var myChoiceLabel = "Chưa chọn";
-  if (hasHopeStar && !showStarNumber) {
-    // Nếu có sao nhưng chưa hiển thị số (trận chưa kết thúc và không phải tab past)
+  // Nếu có sao và trận chưa có kết quả (actualWinningChoice falsy) và không phải tab 'past',
+  // chỉ hiển thị biểu tượng sao và không hiện tên đội.
+  if (hasHopeStar && !actualWinningChoice && currentTab !== "past") {
     myChoiceLabel = "⭐";
   } else {
     myChoiceLabel =
