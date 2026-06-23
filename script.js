@@ -469,7 +469,7 @@ function renderMatches() {
                 ▼ ${lowerTeam}
               </button>
             </div>
-            <select id="star-select-${row[0]}" class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5 outline-none cursor-pointer mt-1 hover:bg-amber-100 transition-colors w-full md:w-auto" ${isDisabled}>
+            <select id="star-select-${row[0]}" onchange="onStarSelectChange(this, ${row[0]})" class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5 outline-none cursor-pointer mt-1 hover:bg-amber-100 transition-colors w-full md:w-auto" ${isDisabled}>
               <option value="">Bình thường (10đ)</option>
               <option value="20" ${usedStarOnThisMatch === 20 ? "selected" : !currentAvailableStars.includes(20) ? "disabled" : ""}>⭐ 20 điểm ${!currentAvailableStars.includes(20) && usedStarOnThisMatch !== 20 ? "(Đã dùng)" : ""}</option>
               <option value="30" ${usedStarOnThisMatch === 30 ? "selected" : !currentAvailableStars.includes(30) ? "disabled" : ""}>⭐ 30 điểm ${!currentAvailableStars.includes(30) && usedStarOnThisMatch !== 30 ? "(Đã dùng)" : ""}</option>
@@ -598,6 +598,21 @@ function bet(btn, stt, choice) {
       console.error(err);
       btn.innerText = originalText;
     });
+}
+
+function onStarSelectChange(sel, stt) {
+  try {
+    var val = sel.value;
+    var btnU = document.getElementById("btn-u-" + stt);
+    var btnD = document.getElementById("btn-d-" + stt);
+    // Khi user chọn một giá trị sao (khác rỗng), xóa highlight hiện tại
+    if (val) {
+      if (btnU) btnU.classList.remove("selected");
+      if (btnD) btnD.classList.remove("selected");
+    }
+  } catch (e) {
+    console.error("onStarSelectChange error", e);
+  }
 }
 
 function showToast(msg) {
