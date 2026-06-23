@@ -57,24 +57,42 @@ function doPost(e) {
 }
 
 function getUserInfo(email) {
-  var data = SpreadsheetApp
-    .getActiveSpreadsheet()
-    .getSheetByName("Data")
-    .getRange("A2:C50")
-    .getValues();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetData = ss.getSheetByName("Data");
+  var data = sheetData.getRange("A2:C50").getValues();
+
+  var name = "Khách";
+  var colChar = "";
 
   for (var i = 0; i < data.length; i++) {
     if (data[i][0] == email) {
-      return {
-        name: data[i][1],
-        email: email
-      };
+      name = data[i][1];
+      colChar = data[i][2];
+      break;
+    }
+  }
+
+  var starsRemaining = 5;
+  if (colChar !== "") {
+    var sheetBet = ss.getSheetByName("Đặt cược");
+    if (sheetBet) {
+      var colNum = columnLetterToNumber(colChar);
+      var userBets = sheetBet.getRange(3, colNum, 100, 1).getValues();
+      var usedStars = 0;
+      for (var k = 0; k < userBets.length; k++) {
+        if (String(userBets[k][0]).indexOf("⭐") !== -1) {
+          usedStars++;
+        }
+      }
+      starsRemaining = 5 - usedStars;
+      if (starsRemaining < 0) starsRemaining = 0;
     }
   }
 
   return {
-    name: "Khách",
-    email: email
+    name: name,
+    email: email,
+    starsRemaining: starsRemaining
   };
 }
 
@@ -182,6 +200,22 @@ function submitBet(email, stt, choice) {
     new Date(matchTime.getTime() - 60 * 60 * 1000)
   ) {
     return "❌ Đã quá thời gian!";
+  }
+
+  var isHopeStar = choice.indexOf("⭐") !== -1;
+  var userBets = sheetBet.getRange(3, userColNum, 100, 1).getValues();
+  var usedStars = 0;
+  
+  for (var k = 0; k < userBets.length; k++) {
+    if ((k + 3) !== row) { // Don't count existing bet for the current match
+      if (String(userBets[k][0]).indexOf("⭐") !== -1) {
+        usedStars++;
+      }
+    }
+  }
+
+  if (isHopeStar && usedStars >= 5) {
+    return "❌ Lỗi: Bạn đã hết Ngôi sao hy vọng!";
   }
 
   sheetBet
