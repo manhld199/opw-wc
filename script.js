@@ -453,7 +453,7 @@ function renderMatches() {
                 ▼ ${lowerTeam}
               </button>
             </div>
-            <select id="star-select-${row[0]}" class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5 outline-none cursor-pointer mt-1 hover:bg-amber-100 transition-colors w-full md:w-auto" ${isDisabled}>
+            <select id="star-select-${row[0]}" onchange="onStarChange(this, ${row[0]}, '${betValue}')" class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5 outline-none cursor-pointer mt-1 hover:bg-amber-100 transition-colors w-full md:w-auto" ${isDisabled}>
               <option value="">Bình thường (10đ)</option>
               <option value="20" ${usedStarOnThisMatch === 20 ? 'selected' : (!currentAvailableStars.includes(20) ? 'disabled' : '')}>⭐ 20 điểm ${!currentAvailableStars.includes(20) && usedStarOnThisMatch !== 20 ? '(Đã dùng)' : ''}</option>
               <option value="30" ${usedStarOnThisMatch === 30 ? 'selected' : (!currentAvailableStars.includes(30) ? 'disabled' : '')}>⭐ 30 điểm ${!currentAvailableStars.includes(30) && usedStarOnThisMatch !== 30 ? '(Đã dùng)' : ''}</option>
@@ -581,6 +581,50 @@ function bet(btn, stt, choice) {
       showToast("Lỗi: " + err.message);
       console.error(err);
       btn.innerText = originalText;
+    });
+}
+
+function onStarChange(selectEl, stt, currentBetValue) {
+  if (currentTab === "past" || currentTab === "leaderboard") return;
+  
+  // Nếu người dùng chưa chọn cửa nào thì không cần submit, 
+  // cứ để giá trị đó chờ người dùng nhấn nút chọn cửa
+  if (!currentBetValue) {
+    return;
+  }
+
+  // Đã có cửa rồi, tự động submit lại
+  var btnId = currentBetValue === "Cửa trên" ? "btn-u-" + stt : "btn-d-" + stt;
+  var btn = document.getElementById(btnId);
+  
+  var choice = currentBetValue;
+  if (selectEl.value) {
+    choice += " ⭐" + selectEl.value;
+  }
+
+  // Disable select tạm thời để tránh spam
+  var originalSelectDisabled = selectEl.disabled;
+  selectEl.disabled = true;
+
+  var originalText = "";
+  if (btn) {
+    originalText = btn.innerText;
+    btn.innerText = "⏳...";
+  }
+
+  apiCall("submitBet", {
+    stt: stt,
+    choice: choice,
+  })
+    .then((res) => {
+      showToast(typeof res === "string" ? res : JSON.stringify(res));
+      loadData(false); // Sẽ gọi render lại, enable lại mọi thứ
+    })
+    .catch((err) => {
+      showToast("Lỗi: " + err.message);
+      console.error(err);
+      if (btn) btn.innerText = originalText;
+      selectEl.disabled = originalSelectDisabled;
     });
 }
 
