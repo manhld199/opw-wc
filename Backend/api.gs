@@ -657,8 +657,8 @@ function getChartData() {
   
   if (!sheetScore || !sheetData) return { error: "Không tìm thấy sheet Tính điểm" };
 
-  var scoreData = sheetScore.getRange("A3:Z100").getValues();
-  var userData = sheetData.getRange("A2:C50").getValues();
+  var scoreData = sheetScore.getRange("A3:AZ200").getValues();
+  var userData = sheetData.getRange("A2:C100").getValues();
   
   var users = [];
   for (var u = 0; u < userData.length; u++) {
