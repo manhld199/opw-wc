@@ -375,46 +375,46 @@ function renderMatches() {
       matchDataCache[row[0]] = row;
 
       tbody.innerHTML += `
-        <div onclick="openMatchDetail(${row[0]})" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden match-card p-6 flex flex-col md:flex-row items-center justify-between gap-6 cursor-pointer hover:bg-emerald-50/10 hover:border-emerald-100 transition-all fade-in-up">
-          <div class="flex flex-col md:flex-row items-center gap-6 flex-1 justify-center md:justify-start">
+        <div onclick="openMatchDetail(${row[0]})" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden match-card p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 cursor-pointer hover:bg-emerald-50/10 hover:border-emerald-100 transition-all fade-in-up">
+          <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6 flex-1 justify-center md:justify-start w-full md:w-auto">
             <div class="flex md:flex-col items-center justify-between md:border-r border-gray-100 md:pr-6 md:w-44 text-center w-full md:w-auto">
-              <div>
+              <div class="text-left md:text-center">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Kick-off</p>
-                <p class="text-sm font-bold text-gray-700">${timeStr}</p>
+                <p class="text-xs md:text-sm font-bold text-gray-700">${timeStr}</p>
               </div>
-              <div class="mt-2">
-                <span class="status-badge ${badgeClass} text-[11px] py-1 px-3">${badgeText}</span>
+              <div class="mt-0 md:mt-2 text-right md:text-center">
+                <span class="status-badge ${badgeClass} text-[10px] md:text-[11px] py-1 px-2 md:px-3">${badgeText}</span>
               </div>
             </div>
 
-            <div class="flex items-center gap-8 justify-center flex-1">
-              <div class="text-center md:text-left min-w-[120px]">
-                <h3 class="text-base font-bold text-gray-800 flex items-center justify-center md:justify-start flex-wrap gap-1">${homeTeam}${homeBadge}</h3>
+            <div class="flex items-center gap-2 md:gap-8 justify-between md:justify-center w-full md:w-auto flex-1">
+              <div class="text-center md:text-left flex-1 md:flex-none md:min-w-[120px]">
+                <h3 class="text-sm md:text-base font-bold text-gray-800 flex items-center justify-center md:justify-start flex-wrap gap-1">${homeTeam}${homeBadge}</h3>
                 <p class="text-[10px] font-bold text-gray-400 mt-0.5 uppercase">CHỦ NHÀ</p>
               </div>
-              <div class="flex flex-col items-center">
-                <div class="flex items-center gap-3">
-                  <span class="text-2xl font-black text-gray-800">${homeScore !== "" ? homeScore : ""}</span>
-                  <span class="text-gray-300 font-medium text-lg">${homeScore !== "" && awayScore !== "" ? "-" : "vs"}</span>
-                  <span class="text-2xl font-black text-gray-800">${awayScore !== "" ? awayScore : ""}</span>
+              <div class="flex flex-col items-center shrink-0 px-1 md:px-0">
+                <div class="flex items-center gap-1.5 md:gap-3">
+                  <span class="text-lg md:text-2xl font-black text-gray-800">${homeScore !== "" ? homeScore : ""}</span>
+                  <span class="text-gray-300 font-medium text-sm md:text-lg">${homeScore !== "" && awayScore !== "" ? "-" : "vs"}</span>
+                  <span class="text-lg md:text-2xl font-black text-gray-800">${awayScore !== "" ? awayScore : ""}</span>
                 </div>
-                <div class="mt-1.5 px-2.5 py-0.5 bg-yellow-50 text-yellow-700 rounded-lg text-[10px] font-bold border border-yellow-100">
+                <div class="mt-1.5 px-1.5 md:px-2.5 py-0.5 bg-yellow-50 text-yellow-700 rounded-md md:rounded-lg text-[9px] md:text-[10px] font-bold border border-yellow-100">
                   Chấp: ${row[13]}
                 </div>
               </div>
 
-              <div class="text-center md:text-right min-w-[120px]">
-                <h3 class="text-base font-bold text-gray-800 flex items-center justify-center md:justify-end flex-wrap gap-1">${awayBadge}${awayTeam}</h3>
+              <div class="text-center md:text-right flex-1 md:flex-none md:min-w-[120px]">
+                <h3 class="text-sm md:text-base font-bold text-gray-800 flex items-center justify-center md:justify-end flex-wrap gap-1">${awayBadge}${awayTeam}</h3>
                 <p class="text-[10px] font-bold text-gray-400 mt-0.5 uppercase">KHÁCH</p>
               </div>
             </div>
           </div>
 
           <div class="flex gap-2 w-full md:w-auto">
-            <button class="flex-1 md:w-28 py-2.5 rounded-xl border border-gray-100 text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa trên" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
+            <button class="flex-1 md:w-28 py-2 md:py-2.5 rounded-xl border border-gray-100 text-[11px] md:text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa trên" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
               ▲ ${upperTeam} ${betValue === "Cửa trên" && hasHopeStar ? `⭐${usedStarOnThisMatch}` : ""}
             </button>
-            <button class="flex-1 md:w-28 py-2.5 rounded-xl border border-gray-100 text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa dưới" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
+            <button class="flex-1 md:w-28 py-2 md:py-2.5 rounded-xl border border-gray-100 text-[11px] md:text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa dưới" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
               ▼ ${lowerTeam} ${betValue === "Cửa dưới" && hasHopeStar ? `⭐${usedStarOnThisMatch}` : ""}
             </button>
           </div>
@@ -423,53 +423,53 @@ function renderMatches() {
     } else {
       // Active Matches render
       tbody.innerHTML += `
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden match-card p-6 flex flex-col md:flex-row items-center justify-between gap-6 fade-in-up ${unbetClass}">
-          <div class="flex flex-col md:flex-row items-center gap-6 flex-1 justify-center md:justify-start">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden match-card p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 fade-in-up ${unbetClass}">
+          <div class="flex flex-col md:flex-row items-center gap-4 md:gap-6 flex-1 justify-center md:justify-start w-full md:w-auto">
             <div class="flex md:flex-col items-center justify-between md:border-r border-gray-100 md:pr-6 md:w-44 text-center w-full md:w-auto">
-              <div>
+              <div class="text-left md:text-center">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Kick-off</p>
-                <p class="text-sm font-bold text-gray-700">${timeStr}</p>
+                <p class="text-xs md:text-sm font-bold text-gray-700">${timeStr}</p>
               </div>
-              <div class="mt-2" id="cd-${row[0]}">
+              <div class="mt-0 md:mt-2 text-right md:text-center text-xs md:text-sm font-medium" id="cd-${row[0]}">
                 ⏱...
               </div>
             </div>
 
-            <div class="flex items-center gap-8 justify-center flex-1">
-              <div class="text-center md:text-left min-w-[120px]">
-                <h3 class="text-base font-bold text-gray-800 flex items-center justify-center md:justify-start flex-wrap gap-1">${homeTeam}${homeBadge}</h3>
+            <div class="flex items-center gap-2 md:gap-8 justify-between md:justify-center w-full md:w-auto flex-1">
+              <div class="text-center md:text-left flex-1 md:flex-none md:min-w-[120px]">
+                <h3 class="text-sm md:text-base font-bold text-gray-800 flex items-center justify-center md:justify-start flex-wrap gap-1">${homeTeam}${homeBadge}</h3>
                 <p class="text-[10px] font-bold text-gray-400 mt-0.5 uppercase">CHỦ NHÀ</p>
               </div>
               
-              <div class="flex flex-col items-center">
-                <div class="flex items-center gap-2">
-                  <span class="text-xl font-bold text-gray-800">${homeScore !== "" ? homeScore : ""}</span>
-                  <span class="text-gray-300 font-medium text-sm">vs</span>
-                  <span class="text-xl font-bold text-gray-800">${awayScore !== "" ? awayScore : ""}</span>
+              <div class="flex flex-col items-center shrink-0 px-1 md:px-0">
+                <div class="flex items-center gap-1.5 md:gap-2">
+                  <span class="text-lg md:text-xl font-bold text-gray-800">${homeScore !== "" ? homeScore : ""}</span>
+                  <span class="text-gray-300 font-medium text-xs md:text-sm">vs</span>
+                  <span class="text-lg md:text-xl font-bold text-gray-800">${awayScore !== "" ? awayScore : ""}</span>
                   ${liveIndicator}
                 </div>
-                <div class="mt-1.5 px-2.5 py-0.5 bg-yellow-50 text-yellow-700 rounded-lg text-[10px] font-bold border border-yellow-100">
+                <div class="mt-1.5 px-1.5 md:px-2.5 py-0.5 bg-yellow-50 text-yellow-700 rounded-md md:rounded-lg text-[9px] md:text-[10px] font-bold border border-yellow-100">
                   Chấp: ${row[13]}
                 </div>
               </div>
 
-              <div class="text-center md:text-right min-w-[120px]">
-                <h3 class="text-base font-bold text-gray-800 flex items-center justify-center md:justify-end flex-wrap gap-1">${awayBadge}${awayTeam}</h3>
+              <div class="text-center md:text-right flex-1 md:flex-none md:min-w-[120px]">
+                <h3 class="text-sm md:text-base font-bold text-gray-800 flex items-center justify-center md:justify-end flex-wrap gap-1">${awayBadge}${awayTeam}</h3>
                 <p class="text-[10px] font-bold text-gray-400 mt-0.5 uppercase">KHÁCH</p>
               </div>
             </div>
           </div>
 
-          <div class="flex flex-col gap-2 w-full md:w-auto items-end">
+          <div class="flex flex-col gap-2 w-full md:w-auto items-center md:items-end">
             <div class="flex gap-2 w-full md:w-auto">
-              <button id="btn-u-${row[0]}" onclick="bet(this, ${row[0]}, 'Cửa trên')" class="flex-1 md:w-32 py-2.5 rounded-xl border-2 border-gray-100 text-gray-600 font-bold text-sm bg-white hover:border-[#0F5132] hover:text-[#0F5132] transition-all btn-choice ${betValue === "Cửa trên" ? "selected" : ""}" ${isDisabled}>
+              <button id="btn-u-${row[0]}" onclick="bet(this, ${row[0]}, 'Cửa trên')" class="flex-1 md:w-32 py-2 md:py-2.5 rounded-xl border-2 border-gray-100 text-gray-600 font-bold text-[11px] md:text-sm bg-white hover:border-[#0F5132] hover:text-[#0F5132] transition-all btn-choice ${betValue === "Cửa trên" ? "selected" : ""}" ${isDisabled}>
                 ▲ ${upperTeam}
               </button>
-              <button id="btn-d-${row[0]}" onclick="bet(this, ${row[0]}, 'Cửa dưới')" class="flex-1 md:w-32 py-2.5 rounded-xl border-2 border-gray-100 text-gray-600 font-bold text-sm bg-white hover:border-[#0F5132] hover:text-[#0F5132] transition-all btn-choice ${betValue === "Cửa dưới" ? "selected" : ""}" ${isDisabled}>
+              <button id="btn-d-${row[0]}" onclick="bet(this, ${row[0]}, 'Cửa dưới')" class="flex-1 md:w-32 py-2 md:py-2.5 rounded-xl border-2 border-gray-100 text-gray-600 font-bold text-[11px] md:text-sm bg-white hover:border-[#0F5132] hover:text-[#0F5132] transition-all btn-choice ${betValue === "Cửa dưới" ? "selected" : ""}" ${isDisabled}>
                 ▼ ${lowerTeam}
               </button>
             </div>
-            <select id="star-select-${row[0]}" onchange="onStarSelectChange(this, ${row[0]})" class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5 outline-none cursor-pointer mt-1 hover:bg-amber-100 transition-colors w-full md:w-auto" ${isDisabled}>
+            <select id="star-select-${row[0]}" onchange="onStarSelectChange(this, ${row[0]})" class="text-[10px] md:text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-2 md:px-3 py-1.5 outline-none cursor-pointer mt-1 hover:bg-amber-100 transition-colors w-full md:w-auto" ${isDisabled}>
               <option value="">Bình thường (10đ)</option>
               <option value="20" ${usedStarOnThisMatch === 20 ? "selected" : !currentAvailableStars.includes(20) ? "disabled" : ""}>⭐ 20 điểm ${!currentAvailableStars.includes(20) && usedStarOnThisMatch !== 20 ? "(Đã dùng)" : ""}</option>
               <option value="30" ${usedStarOnThisMatch === 30 ? "selected" : !currentAvailableStars.includes(30) ? "disabled" : ""}>⭐ 30 điểm ${!currentAvailableStars.includes(30) && usedStarOnThisMatch !== 30 ? "(Đã dùng)" : ""}</option>
