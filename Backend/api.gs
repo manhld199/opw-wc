@@ -60,6 +60,8 @@ function getUserInfo(email) {
   }
 
   var availableStars = [20, 30, 40, 50];
+  var remainingRocket = 200;
+
   if (colChar !== "") {
     var sheetBet = ss.getSheetByName("Đặt cược");
     if (sheetBet) {
@@ -75,6 +77,10 @@ function getUserInfo(email) {
             availableStars.splice(idx, 1);
           }
         }
+        var rocketMatch = betStr.match(/🚀(\d+)/);
+        if (rocketMatch) {
+          remainingRocket -= parseInt(rocketMatch[1], 10);
+        }
       }
     }
   }
@@ -83,6 +89,7 @@ function getUserInfo(email) {
     name: name,
     email: email,
     availableStars: availableStars,
+    remainingRocket: remainingRocket,
   };
 }
 
@@ -179,6 +186,40 @@ function submitBet(email, stt, choice) {
   try {
     var matchRegex = choice.match(/⭐(\d+)/);
     var requestedStar = matchRegex ? parseInt(matchRegex[1], 10) : null;
+
+    var rocketRegex = choice.match(/🚀(\d+)/);
+    var requestedRocket = rocketRegex ? parseInt(rocketRegex[1], 10) : null;
+
+    if (requestedRocket) {
+      // GIỚI HẠN VÒNG LOẠI TRỰC TIẾP (STT 69 là trận Nam Phi vs Canada - vòng 32 đội)
+      var KNOCKOUT_START_STT = 69; 
+      if (parseInt(stt) < KNOCKOUT_START_STT) {
+        return "❌ Lỗi: Tên lửa hi vọng chỉ được dùng ở vòng loại trực tiếp (Từ trận " + KNOCKOUT_START_STT + ")!";
+      }
+
+      if (requestedRocket < 20) {
+        return "❌ Lỗi: Điểm cược tên lửa tối thiểu là 20!";
+      }
+      var remainingRocket = 200;
+      var maxRow = sheetBet.getLastRow();
+      if (maxRow < 3) maxRow = 3; 
+
+      var userBetsForRocket = sheetBet.getRange(3, userColNum, maxRow - 2, 1).getValues();
+      
+      for (var k = 0; k < userBetsForRocket.length; k++) {
+        if (k + 3 !== row) { 
+          var betStrRocket = String(userBetsForRocket[k][0] || "");
+          var existingRocket = betStrRocket.match(/🚀(\d+)/);
+          if (existingRocket && existingRocket[1]) {
+            remainingRocket -= parseInt(existingRocket[1], 10);
+          }
+        }
+      }
+
+      if (requestedRocket > remainingRocket) {
+        return "❌ Lỗi: Bạn chỉ còn " + remainingRocket + " điểm tên lửa hi vọng!";
+      }
+    }
 
     if (requestedStar) {
       var availableStars = [20, 30, 40, 50];

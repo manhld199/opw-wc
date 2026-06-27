@@ -4,6 +4,7 @@ const GAS_URL =
 let currentUserEmail = "";
 let currentTab = "active"; // Các trạng thái: "active", "past", "leaderboard", hoặc "chart"
 let currentAvailableStars = [20, 30, 40, 50];
+let currentRemainingRocket = 200;
 
 let chartInstance = null;
 let chartRawData = null;
@@ -169,6 +170,7 @@ function loadData(showLoading = true) {
   apiCall("getUserInfo")
     .then((user) => {
       currentAvailableStars = user.availableStars || [20, 30, 40, 50];
+      currentRemainingRocket = user.remainingRocket !== undefined ? user.remainingRocket : 200;
       // Sync names to localstorage in case it changed
       localStorage.setItem("currentUserName", user.name || "");
       document.getElementById("userInfo").innerHTML = `
@@ -181,7 +183,12 @@ function loadData(showLoading = true) {
             <h2 class="text-base font-bold">${user.name}</h2>
           </div>
         </div>
-        <div class="flex items-center gap-6 mt-4 md:mt-0">
+        <div class="flex flex-wrap justify-center sm:justify-end items-center gap-4 sm:gap-6 mt-4 md:mt-0 w-full md:w-auto">
+          <div class="text-center sm:text-right bg-purple-50/50 px-3 py-1.5 rounded-xl border border-purple-100/50">
+            <p class="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Tên lửa hi vọng</p>
+            <p class="text-sm font-bold text-purple-700">🚀 ${currentRemainingRocket} điểm</p>
+          </div>
+          <div class="w-px h-8 bg-gray-100 hidden sm:block"></div>
           <div class="text-right hidden sm:block">
             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email Account</p>
             <p class="text-sm font-medium text-gray-700">${user.email}</p>
@@ -316,7 +323,10 @@ function renderMatches() {
     var matchRegex = betValueRaw.match(/⭐(\d+)/);
     var usedStarOnThisMatch = matchRegex ? parseInt(matchRegex[1]) : null;
     var hasHopeStar = !!usedStarOnThisMatch;
-    var betValue = betValueRaw.replace(/⭐\d+/, "").trim();
+    var rocketRegexMatch = betValueRaw.match(/🚀(\d+)/);
+    var usedRocketOnThisMatch = rocketRegexMatch ? parseInt(rocketRegexMatch[1]) : null;
+    var hasRocket = !!usedRocketOnThisMatch;
+    var betValue = betValueRaw.replace(/⭐\d+/, "").replace(/🚀\d+/, "").trim();
     var winningTeam = String(row[10] || "").trim();
     var upperTeam = String(row[12] || "").trim();
     var lowerTeam = upperTeam === homeTeam ? awayTeam : homeTeam;
@@ -429,10 +439,10 @@ function renderMatches() {
 
           <div class="flex gap-2 w-full md:w-auto">
             <button class="flex-1 md:w-28 py-2 md:py-2.5 rounded-xl border border-gray-100 text-[11px] md:text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa trên" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
-              ▲ ${upperTeam} ${betValue === "Cửa trên" && hasHopeStar ? `⭐${usedStarOnThisMatch}` : ""}
+              ▲ ${upperTeam} ${betValue === "Cửa trên" && hasHopeStar ? `⭐${usedStarOnThisMatch}` : (betValue === "Cửa trên" && hasRocket ? `🚀${usedRocketOnThisMatch}` : "")}
             </button>
             <button class="flex-1 md:w-28 py-2 md:py-2.5 rounded-xl border border-gray-100 text-[11px] md:text-xs text-gray-400 font-semibold bg-gray-50/50 cursor-not-allowed ${betValue === "Cửa dưới" ? "border-emerald-200 bg-emerald-50 text-emerald-700 font-bold" : ""}" disabled>
-              ▼ ${lowerTeam} ${betValue === "Cửa dưới" && hasHopeStar ? `⭐${usedStarOnThisMatch}` : ""}
+              ▼ ${lowerTeam} ${betValue === "Cửa dưới" && hasHopeStar ? `⭐${usedStarOnThisMatch}` : (betValue === "Cửa dưới" && hasRocket ? `🚀${usedRocketOnThisMatch}` : "")}
             </button>
           </div>
         </div>
@@ -486,13 +496,16 @@ function renderMatches() {
                 ▼ ${lowerTeam}
               </button>
             </div>
-            <select id="star-select-${row[0]}" onchange="onStarSelectChange(this, ${row[0]})" class="text-[10px] md:text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-2 md:px-3 py-1.5 outline-none cursor-pointer mt-1 hover:bg-amber-100 transition-colors w-full md:w-auto" ${isDisabled}>
-              <option value="">Bình thường (10đ)</option>
-              <option value="20" ${usedStarOnThisMatch === 20 ? "selected" : !currentAvailableStars.includes(20) ? "disabled" : ""}>⭐ 20 điểm ${!currentAvailableStars.includes(20) && usedStarOnThisMatch !== 20 ? "(Đã dùng)" : ""}</option>
-              <option value="30" ${usedStarOnThisMatch === 30 ? "selected" : !currentAvailableStars.includes(30) ? "disabled" : ""}>⭐ 30 điểm ${!currentAvailableStars.includes(30) && usedStarOnThisMatch !== 30 ? "(Đã dùng)" : ""}</option>
-              <option value="40" ${usedStarOnThisMatch === 40 ? "selected" : !currentAvailableStars.includes(40) ? "disabled" : ""}>⭐ 40 điểm ${!currentAvailableStars.includes(40) && usedStarOnThisMatch !== 40 ? "(Đã dùng)" : ""}</option>
-              <option value="50" ${usedStarOnThisMatch === 50 ? "selected" : !currentAvailableStars.includes(50) ? "disabled" : ""}>⭐ 50 điểm ${!currentAvailableStars.includes(50) && usedStarOnThisMatch !== 50 ? "(Đã dùng)" : ""}</option>
-            </select>
+            <div class="flex gap-2 items-center mt-1 w-full md:w-auto">
+              <select id="star-select-${row[0]}" onchange="onStarSelectChange(this, ${row[0]})" class="flex-1 text-[10px] md:text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-2 md:px-3 py-1.5 outline-none cursor-pointer hover:bg-amber-100 transition-colors" ${isDisabled}>
+                <option value="">Sao (10đ)</option>
+                <option value="20" ${usedStarOnThisMatch === 20 ? "selected" : !currentAvailableStars.includes(20) ? "disabled" : ""}>⭐ 20đ ${!currentAvailableStars.includes(20) && usedStarOnThisMatch !== 20 ? "(Hết)" : ""}</option>
+                <option value="30" ${usedStarOnThisMatch === 30 ? "selected" : !currentAvailableStars.includes(30) ? "disabled" : ""}>⭐ 30đ ${!currentAvailableStars.includes(30) && usedStarOnThisMatch !== 30 ? "(Hết)" : ""}</option>
+                <option value="40" ${usedStarOnThisMatch === 40 ? "selected" : !currentAvailableStars.includes(40) ? "disabled" : ""}>⭐ 40đ ${!currentAvailableStars.includes(40) && usedStarOnThisMatch !== 40 ? "(Hết)" : ""}</option>
+                <option value="50" ${usedStarOnThisMatch === 50 ? "selected" : !currentAvailableStars.includes(50) ? "disabled" : ""}>⭐ 50đ ${!currentAvailableStars.includes(50) && usedStarOnThisMatch !== 50 ? "(Hết)" : ""}</option>
+              </select>
+              <input type="number" id="rocket-input-${row[0]}" min="20" max="${currentRemainingRocket + (usedRocketOnThisMatch || 0)}" value="${usedRocketOnThisMatch || ""}" placeholder="${parseInt(row[0]) >= 69 ? '🚀 Tên lửa (≥20đ)' : '🚀 Chỉ Knockout'}" class="flex-1 text-[10px] md:text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 rounded-lg px-2 md:px-3 py-1.5 outline-none hover:bg-purple-100 transition-colors w-28 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed" ${isDisabled || parseInt(row[0]) < 69 ? 'disabled' : ''} oninput="onRocketInputChange(this, ${row[0]})" title="${parseInt(row[0]) < 69 ? 'Tên lửa hi vọng chỉ được dùng từ vòng Knockout' : ''}">
+            </div>
           </div>
         </div>
       `;
@@ -596,8 +609,20 @@ function bet(btn, stt, choice) {
   if (currentTab === "past" || currentTab === "leaderboard") return;
 
   var starSelect = document.getElementById("star-select-" + stt);
-  if (starSelect && starSelect.value) {
-    choice += " ⭐" + starSelect.value;
+  var rocketInput = document.getElementById("rocket-input-" + stt);
+
+  var sVal = starSelect && starSelect.value ? parseInt(starSelect.value) : 0;
+  var rVal = rocketInput && rocketInput.value ? parseInt(rocketInput.value) : 0;
+
+  if (sVal > 0 && rVal > 0) {
+    showToast("❌ Lỗi: Chỉ được chọn 1 loại (Sao hoặc Tên lửa) cho 1 trận!");
+    return;
+  }
+
+  if (sVal > 0) {
+    choice += " ⭐" + sVal;
+  } else if (rVal > 0) {
+    choice += " 🚀" + rVal;
   }
 
   const originalText = btn.innerText;
@@ -627,9 +652,27 @@ function onStarSelectChange(sel, stt) {
     if (val) {
       if (btnU) btnU.classList.remove("selected");
       if (btnD) btnD.classList.remove("selected");
+      var rocketInput = document.getElementById("rocket-input-" + stt);
+      if (rocketInput) rocketInput.value = "";
     }
   } catch (e) {
     console.error("onStarSelectChange error", e);
+  }
+}
+
+function onRocketInputChange(inp, stt) {
+  try {
+    var val = inp.value;
+    var btnU = document.getElementById("btn-u-" + stt);
+    var btnD = document.getElementById("btn-d-" + stt);
+    if (val) {
+      if (btnU) btnU.classList.remove("selected");
+      if (btnD) btnD.classList.remove("selected");
+      var starSelect = document.getElementById("star-select-" + stt);
+      if (starSelect) starSelect.value = "";
+    }
+  } catch (e) {
+    console.error("onRocketInputChange error", e);
   }
 }
 
@@ -812,7 +855,10 @@ function openMatchDetail(stt) {
   var matchRegexDetail = betValueRaw.match(/⭐(\d+)/);
   var usedStarOnThisMatch = matchRegexDetail ? parseInt(matchRegexDetail[1]) : null;
   var hasHopeStar = !!usedStarOnThisMatch;
-  var betValue = betValueRaw.replace(/⭐\d+/, "").trim();
+  var rocketRegexDetail = betValueRaw.match(/🚀(\d+)/);
+  var usedRocketOnThisMatch = rocketRegexDetail ? parseInt(rocketRegexDetail[1]) : null;
+  var hasRocket = !!usedRocketOnThisMatch;
+  var betValue = betValueRaw.replace(/⭐\d+/, "").replace(/🚀\d+/, "").trim();
   var winningTeam = String(row[10] || "").trim();
 
   var matchStatusDetail = String(row[8] || "").trim();
@@ -858,12 +904,12 @@ function openMatchDetail(stt) {
     myResultBadge = '<span class="status-badge status-lose">❌ Thua</span>';
   }
 
-  var starSuffix = hasHopeStar ? (showStarNumber ? ` ⭐${usedStarOnThisMatch}` : " ⭐") : "";
+  var starSuffix = hasHopeStar ? (showStarNumber ? ` ⭐${usedStarOnThisMatch}` : " ⭐") : (hasRocket ? (showStarNumber ? ` 🚀${usedRocketOnThisMatch}` : " 🚀") : "");
   var myChoiceLabel = "Chưa chọn";
-  // Nếu có sao và trận chưa có kết quả (actualWinningChoice falsy) và không phải tab 'past',
-  // chỉ hiển thị biểu tượng sao và không hiện tên đội.
-  if (hasHopeStar && !actualWinningChoice && currentTab !== "past") {
-    myChoiceLabel = "⭐";
+  // Nếu có sao/tên lửa và trận chưa có kết quả (actualWinningChoice falsy) và không phải tab 'past',
+  // chỉ hiển thị biểu tượng và không hiện tên đội.
+  if ((hasHopeStar || hasRocket) && !actualWinningChoice && currentTab !== "past") {
+    myChoiceLabel = hasRocket ? "🚀" : "⭐";
   } else {
     myChoiceLabel =
       betValue === "Cửa trên"
@@ -965,7 +1011,9 @@ function openMatchDetail(stt) {
         var raw = String(v.choice || "");
         var starMatch = raw.match(/⭐(\d+)/);
         var voteStar = starMatch ? parseInt(starMatch[1]) : null;
-        var cleaned = raw.replace(/⭐\d+/, "").trim();
+        var rocketMatch = raw.match(/🚀(\d+)/);
+        var voteRocket = rocketMatch ? parseInt(rocketMatch[1]) : null;
+        var cleaned = raw.replace(/⭐\d+/, "").replace(/🚀\d+/, "").trim();
 
         var isCorrect =
           actualWinningChoice && actualWinningChoice !== "Hòa" && cleaned === actualWinningChoice;
@@ -977,19 +1025,20 @@ function openMatchDetail(stt) {
         var isDraw = actualWinningChoice === "Hòa";
 
         var choiceLabel = "—";
-        // If vote used a hope-star
-        if (voteStar) {
+        // If vote used a hope-star or rocket
+        if (voteStar || voteRocket) {
           // Nếu trận đã kết thúc (showStarNumber = true), hiển thị đầy đủ
           if (showStarNumber) {
+            var badgeStr = voteRocket ? `🚀${voteRocket}` : `⭐${voteStar}`;
             choiceLabel =
               cleaned === "Cửa trên"
-                ? `▲ ${upperTeam} ⭐${voteStar}`
+                ? `▲ ${upperTeam} ${badgeStr}`
                 : cleaned === "Cửa dưới"
-                  ? `▼ ${lowerTeam} ⭐${voteStar}`
-                  : `⭐${voteStar}`;
+                  ? `▼ ${lowerTeam} ${badgeStr}`
+                  : `${badgeStr}`;
           } else {
             // Nếu trận chưa kết thúc, chỉ hiển thị số điểm của sao
-            choiceLabel = `⭐${voteStar}`;
+            choiceLabel = voteRocket ? `🚀${voteRocket}` : `⭐${voteStar}`;
           }
         } else {
           // No star used, show normal team label
