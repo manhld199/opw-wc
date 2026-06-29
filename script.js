@@ -985,12 +985,12 @@ function openMatchDetail(stt) {
 
       var upperCount = votes.filter(function (v) {
         var raw = String(v.choice || "");
-        var cleaned = raw.replace(/⭐\d+/, "").trim();
+        var cleaned = raw.replace(/⭐\d+/, "").replace(/🚀\d+/, "").trim();
         return cleaned === "Cửa trên";
       }).length;
       var lowerCount = votes.filter(function (v) {
         var raw = String(v.choice || "");
-        var cleaned = raw.replace(/⭐\d+/, "").trim();
+        var cleaned = raw.replace(/⭐\d+/, "").replace(/🚀\d+/, "").trim();
         return cleaned === "Cửa dưới";
       }).length;
       var total = votes.length;
