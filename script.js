@@ -140,10 +140,20 @@ function switchTab(tabName) {
       ? "font-bold text-[#0F5132] border-b-4 border-[#0F5132]"
       : "font-semibold text-gray-400 hover:text-gray-600");
 
+  const btnIsland = document.getElementById("btnIsland");
+  if (btnIsland) {
+    btnIsland.className =
+      "pb-3 px-1 text-sm whitespace-nowrap transition-all " +
+      (tabName === "island"
+        ? "font-bold text-blue-500 border-b-4 border-blue-500"
+        : "font-semibold text-gray-400 hover:text-gray-600");
+  }
+
   // Xử lý ẩn hiện bảng phù hợp với tab được chọn
   document.getElementById("mainTable").style.display = "none";
   document.getElementById("leaderboardTable").style.display = "none";
   document.getElementById("chartSection").style.display = "none";
+  if (document.getElementById("islandSection")) document.getElementById("islandSection").style.display = "none";
 
   if (tabName === "leaderboard") {
     document.getElementById("leaderboardTable").style.display = "block";
@@ -151,6 +161,9 @@ function switchTab(tabName) {
   } else if (tabName === "chart") {
     document.getElementById("chartSection").style.display = "block";
     loadChartData();
+  } else if (tabName === "island") {
+    document.getElementById("islandSection").style.display = "block";
+    loadIslandData();
   } else {
     document.getElementById("mainTable").style.display = "block";
 
@@ -598,6 +611,79 @@ function loadLeaderboardData() {
     .catch((err) => {
       console.error(err);
       tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-red-500">Có lỗi xảy ra khi kết nối đồng bộ!</td></tr>`;
+      hideLoader();
+    });
+}
+
+function loadIslandData() {
+  showLoader();
+  var tbody = document.getElementById("islandBody");
+  tbody.innerHTML = `<div class="col-span-full text-center py-10 text-blue-300/50 animate-pulse font-bold">Đang quét radar tìm kiếm người mắc kẹt...</div>`;
+
+  apiCall("getLeaderboard")
+    .then((data) => {
+      tbody.innerHTML = "";
+
+      if (!data || data.error || data.length === 0) {
+        tbody.innerHTML = `<div class="col-span-full text-center p-8 text-blue-200 font-semibold">Không có ai trên đảo. Mọi người đều an toàn!</div>`;
+        hideLoader();
+        return;
+      }
+
+      // Lọc ra những người có điểm âm
+      var islanders = data.filter(p => Number(p.totalScore) < 0);
+
+      // Sắp xếp theo mức độ âm (âm nhiều nhất lên đầu)
+      islanders.sort((a, b) => Number(a.totalScore) - Number(b.totalScore));
+
+      if (islanders.length === 0) {
+        tbody.innerHTML = `<div class="col-span-full text-center p-8 text-blue-200 font-semibold">Đảo trống vắng. Không có ai đang âm điểm!</div>`;
+        hideLoader();
+        return;
+      }
+
+      islanders.forEach((player) => {
+        let badgesHtml = "";
+        if (player.badges && player.badges.length > 0) {
+          badgesHtml = '<div class="flex flex-wrap gap-1 justify-center mt-2">';
+          player.badges.forEach((b) => {
+            let bClass = "";
+            if (b.includes("Tiên Tri")) bClass = "badge-tien-tri";
+            else if (b.includes("Pele")) bClass = "badge-pele";
+            else if (b.includes("Từ Thiện")) bClass = "badge-tu-thien";
+            else if (b.includes("Tâm Linh")) bClass = "badge-tam-linh";
+            else if (b.includes("Ngược Dòng")) bClass = "badge-nguoc-dong";
+            else if (b.includes("Nạn Nhân")) bClass = "badge-nan-nhan";
+            badgesHtml += `<span class="player-badge ${bClass} text-[10px] px-1.5 py-0.5">${b}</span>`;
+          });
+          badgesHtml += "</div>";
+        }
+
+        tbody.innerHTML += `
+          <div class="bg-blue-900/40 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-blue-800/50 flex flex-col items-center text-center transform transition-all hover:scale-105 hover:bg-blue-800/50 hover:shadow-2xl shadow-lg relative group">
+            <div class="absolute -top-3 -right-3 text-2xl opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md animate-bounce">
+              🥶
+            </div>
+            <div class="w-16 h-16 rounded-full bg-blue-950 border-2 border-blue-700/50 flex items-center justify-center mb-3 shadow-inner">
+              <i class="ti ti-ghost text-3xl text-blue-400"></i>
+            </div>
+            <h3 class="font-extrabold text-blue-100 text-lg mb-1 truncate w-full">${player.name}</h3>
+            <p class="text-xs text-blue-300 font-medium mb-3">Tỷ lệ thắng: ${(typeof player.winRate === "number" ? (player.winRate * 100).toFixed(1) : player.winRate)}%</p>
+            <div class="text-2xl font-black text-red-400 drop-shadow-md mb-2 bg-black/20 px-4 py-1 rounded-xl border border-red-500/20">
+              ${player.totalScore}
+            </div>
+            ${badgesHtml}
+            <button class="mt-4 w-full bg-blue-600/30 hover:bg-blue-500/50 text-blue-200 text-xs font-bold py-2 px-4 rounded-xl border border-blue-500/30 transition-all flex items-center justify-center gap-1" onclick="showToast('Tính năng Bơm Máu (Donate) đang được xây dựng. Cứu trợ tạm thời bằng tình cảm nhé!')">
+              <i class="ti ti-lifeboat"></i> Ném phao
+            </button>
+          </div>
+        `;
+      });
+      hideLoader();
+    })
+    .catch((err) => {
+      console.error(err);
+      tbody.innerHTML = `<div class="col-span-full text-center p-8 text-red-400">Có lỗi khi tải danh sách người mắc kẹt!</div>`;
       hideLoader();
     });
 }
