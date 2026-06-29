@@ -349,6 +349,8 @@ function getLeaderboard() {
         colChar: String(userData[u][2]).trim(),
         cuaDuoiCount: 0,
         nguocDongPoints: 0,
+        usedStar: false,
+        usedRocket: false,
       };
     }
   }
@@ -386,10 +388,15 @@ function getLeaderboard() {
         var betVal = String(betRange[j][cIdx]).trim();
         matchBets[pName] = betVal;
 
-        if (betVal === "Cửa dưới") userStats[pName].cuaDuoiCount++;
+        if (betVal.includes("⭐")) userStats[pName].usedStar = true;
+        if (betVal.includes("🚀")) userStats[pName].usedRocket = true;
 
-        if (betVal === "Cửa trên") upperCount++;
-        else if (betVal === "Cửa dưới") lowerCount++;
+        var cleanedBet = betVal.replace(/⭐\d+/, "").replace(/🚀\d+/, "").trim();
+
+        if (cleanedBet === "Cửa dưới") userStats[pName].cuaDuoiCount++;
+
+        if (cleanedBet === "Cửa trên") upperCount++;
+        else if (cleanedBet === "Cửa dưới") lowerCount++;
 
         totalBets++;
       }
@@ -443,6 +450,8 @@ function getLeaderboard() {
       badges: [],
       _cuaDuoiCount: userStats[playerName] ? userStats[playerName].cuaDuoiCount : 0,
       _nguocDongPoints: userStats[playerName] ? userStats[playerName].nguocDongPoints : 0,
+      _usedStar: userStats[playerName] ? userStats[playerName].usedStar : false,
+      _usedRocket: userStats[playerName] ? userStats[playerName].usedRocket : false,
       _hopeStarImpact: hopeStarImpact,
     });
   }
@@ -512,7 +521,13 @@ function getLeaderboard() {
       p.badges.push("🐟 Trùm Ngược Dòng");
     }
     if (p._hopeStarImpact < 0) {
-      p.badges.push("🤡 Nạn Nhân Của Sao Hi Vọng");
+      if (p._usedStar && p._usedRocket) {
+        p.badges.push("🤡 Siêu Nạn Nhân");
+      } else if (p._usedRocket) {
+        p.badges.push("🤡 Nạn Nhân Của Tên Lửa Hi Vọng");
+      } else {
+        p.badges.push("🤡 Nạn Nhân Của Sao Hi Vọng");
+      }
     }
   }
 

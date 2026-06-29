@@ -1085,6 +1085,7 @@ function openMatchDetail(stt) {
             else if (b.includes("Từ Thiện")) bClass = "badge-tu-thien";
             else if (b.includes("Tâm Linh")) bClass = "badge-tam-linh";
             else if (b.includes("Ngược Dòng")) bClass = "badge-nguoc-dong";
+            else if (b.includes("Nạn Nhân")) bClass = "badge-nan-nhan";
             userBadgeHtml += `<span class="player-badge ${bClass} text-[9px] px-1 py-0.5" title="${b}">${b.split(" ")[0]}</span>`;
           });
           userBadgeHtml += "</div>";
