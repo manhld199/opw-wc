@@ -532,14 +532,14 @@ function renderMatches() {
 function loadLeaderboardData() {
   showLoader();
   var tbody = document.getElementById("leaderboardBody");
-  tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-gray-500">⏳ Đang tải bảng điểm...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="9" class="text-center p-8 text-gray-500">⏳ Đang tải bảng điểm...</td></tr>`;
 
   apiCall("getLeaderboard")
     .then((data) => {
       tbody.innerHTML = "";
 
       if (!data || data.error || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-red-500 font-semibold">Không thể tải dữ liệu hoặc bảng trống!</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center p-8 text-red-500 font-semibold">Không thể tải dữ liệu hoặc bảng trống!</td></tr>`;
         hideLoader();
         return;
       }
@@ -585,6 +585,7 @@ function loadLeaderboardData() {
               ${badgesHtml}
             </td>
             <td class="p-4 text-center font-extrabold text-[#0F5132]">${player.totalScore}</td>
+            <td class="p-4 text-center font-bold text-purple-600">🚀 ${player.remainingRocket !== undefined ? player.remainingRocket : '--'}</td>
             <td class="p-4 text-center font-bold text-green-600">${player.winMatches}</td>
             <td class="p-4 text-center font-bold text-red-500">${player.loseMatches}</td>
             <td class="p-4 text-center font-semibold text-gray-700">${winRateFormatted}</td>
@@ -597,7 +598,7 @@ function loadLeaderboardData() {
     })
     .catch((err) => {
       console.error(err);
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-red-500">Có lỗi xảy ra khi kết nối đồng bộ!</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center p-8 text-red-500">Có lỗi xảy ra khi kết nối đồng bộ!</td></tr>`;
       hideLoader();
     });
 }
